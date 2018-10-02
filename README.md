@@ -8,5 +8,6 @@ O Instituto Nacional de Emergência Médica, (INEM) é o Organismo do Ministéri
 
 Desta forma, é necessário realizar a melhor alocação de meios face às ocorrências que vão surgindo. 
 
+Cada chamada efetuada para o CODU (centro de orientação de doentes urgentes) representa uma situação com diferente número de vítimas envolvidas, com diferentes gravidades afetando a prioridade, diferentes distâncias 
 
 
