@@ -8,6 +8,6 @@ O Instituto Nacional de Emergência Médica, (INEM) é o Organismo do Ministéri
 
 Desta forma, é necessário realizar a melhor alocação de meios face às ocorrências que vão surgindo. 
 
-Cada chamada efetuada para o CODU (centro de orientação de doentes urgentes) representa uma situação com diferente número de vítimas envolvidas, com diferentes gravidades afetando a prioridade, diferentes distâncias 
+Cada chamada efetuada para o CODU (centro de orientação de doentes urgentes) representa uma situação com diferente número de vítimas envolvidas, com diferentes gravidades afetando a prioridade da situação, diferentes distâncias e diferentes necessidades de meios (VMER,ambulância,SIV e helicópetero).A alocação de recursos a cada situação deve ser dinâmica através da negociação entre as diferentes situações de emergência. Os agentes são por um lado as diferentes situações que necessitam de recursos e também os próprios recursos disponíveis
 
 
