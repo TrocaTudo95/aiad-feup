@@ -146,7 +146,7 @@ public class Ambulance extends Agent {
 				// Send the purchase order to the seller that provided the best offer
 				ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 				order.addReceiver(higherEmergency);
-				order.setContent(targetBookTitle);
+				order.setContent("the ambulance is coming to you sir");
 				order.setConversationId("book-trade");
 				order.setReplyWith("order"+System.currentTimeMillis());
 				myAgent.send(order);
@@ -162,7 +162,7 @@ public class Ambulance extends Agent {
 					// Purchase order reply received
 					if (reply.getPerformative() == ACLMessage.INFORM) {
 						// Purchase successful. We can terminate
-						System.out.println(targetBookTitle+" successfully purchased from agent "+reply.getSender().getName());
+						System.out.println("emergency +"+reply.getSender().getName()+" successfully responded");
 						System.out.println("Price = "+higherPriority);
 						myAgent.doDelete();
 					}
