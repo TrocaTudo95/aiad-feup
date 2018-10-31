@@ -35,7 +35,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import java.util.*;
 
 public class Emergency extends Agent {
-	// The catalogue of books for sale (maps the title of a book to its price)
+
+	
 	//private Hashtable catalogue;
 	private int priority;
 	private int localization_x;
