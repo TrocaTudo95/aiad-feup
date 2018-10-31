@@ -35,10 +35,19 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 public class Ambulance extends Agent {
 	private AID[] emergencyAgents;
+	private int localization_x;
+	private int localization_y;
 
 	// Put agent initializations here
 	protected void setup() {
 		// Printout a welcome message
+		
+		Object[] args = getArguments();
+		if (args != null && args.length > 2) {
+			localization_x = Integer.parseInt((String) args[0]);
+			localization_y = Integer.parseInt((String) args[1]);
+		}
+		
 		System.out.println("Ambulance "+getAID().getName()+" is ready.");
 
 			// Add a TickerBehaviour that schedules a request to seller agents every minute
