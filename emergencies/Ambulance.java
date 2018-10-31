@@ -34,21 +34,12 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 public class Ambulance extends Agent {
-	// The title of the book to buy
-	private String targetBookTitle;
-	// The list of known seller agents
 	private AID[] emergencyAgents;
 
 	// Put agent initializations here
 	protected void setup() {
 		// Printout a welcome message
 		System.out.println("Ambulance "+getAID().getName()+" is ready.");
-
-		// Get the title of the book to buy as a start-up argument
-		//Object[] args = getArguments();
-//		if (args != null && args.length > 0) {
-//			targetBookTitle = (String) args[0];
-//			System.out.println("Target book is "+targetBookTitle);
 
 			// Add a TickerBehaviour that schedules a request to seller agents every minute
 			addBehaviour(new TickerBehaviour(this, 60000) {
@@ -109,12 +100,12 @@ public class Ambulance extends Agent {
 				for (int i = 0; i < emergencyAgents.length; ++i) {
 					cfp.addReceiver(emergencyAgents[i]);
 				} 
-				cfp.setContent(targetBookTitle);
-				cfp.setConversationId("book-trade");
+				cfp.setContent("nada");
+				cfp.setConversationId("emergency");
 				cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
 				myAgent.send(cfp);
 				// Prepare the template to get proposals
-				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("book-trade"),
+				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("emergency"),
 						MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
 				step = 1;
 				break;
@@ -146,12 +137,12 @@ public class Ambulance extends Agent {
 				// Send the purchase order to the seller that provided the best offer
 				ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 				order.addReceiver(higherEmergency);
-				order.setContent("the ambulance is coming to you sir");
-				order.setConversationId("book-trade");
+				order.setContent("the ambulance is coming to you sir\n");
+				order.setConversationId("emergency");
 				order.setReplyWith("order"+System.currentTimeMillis());
 				myAgent.send(order);
 				// Prepare the template to get the purchase order reply
-				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("book-trade"),
+				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("emergency"),
 						MessageTemplate.MatchInReplyTo(order.getReplyWith()));
 				step = 3;
 				break;
@@ -181,7 +172,7 @@ public class Ambulance extends Agent {
 
 		public boolean done() {
 			if (step == 2 && higherEmergency == null) {
-				System.out.println("Attempt failed: "+targetBookTitle+" not available for sale");
+				System.out.println("Attempt failed: "+" not available for sale");
 			}
 			return ((step == 2 && higherEmergency == null) || step == 4);
 		}

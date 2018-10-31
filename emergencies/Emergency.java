@@ -38,6 +38,8 @@ public class Emergency extends Agent {
 	// The catalogue of books for sale (maps the title of a book to its price)
 	//private Hashtable catalogue;
 	private int priority;
+	private int localization_x;
+	private int localization_y;
 	// The GUI by means of which the user can add books in the catalogue
 	//private EmergencyGui myGui;
 
@@ -46,8 +48,10 @@ public class Emergency extends Agent {
 		// Create the catalogue
 		// Get the title of the book to buy as a start-up argument
 				Object[] args = getArguments();
-				if (args != null && args.length > 0) {
+				if (args != null && args.length > 2) {
 					priority = Integer.parseInt((String) args[0]);
+					localization_x = Integer.parseInt((String) args[1]);
+					localization_y = Integer.parseInt((String) args[2]);
 					System.out.println("The priority is "+priority);
 				}
 				else
@@ -148,7 +152,7 @@ public class Emergency extends Agent {
 				ACLMessage reply = msg.createReply();
 				//if (price != null) {
 					reply.setPerformative(ACLMessage.INFORM);
-					System.out.println(title+" sold to agent "+msg.getSender().getName());
+					System.out.println(title+"atended by ambulance "+msg.getSender().getName());
 			//	}
 //				else {
 //					// The requested book has been sold to another buyer in the meanwhile .
