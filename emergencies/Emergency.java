@@ -49,14 +49,17 @@ public class Emergency extends Agent {
 		// Create the catalogue
 		// Get the title of the book to buy as a start-up argument
 				Object[] args = getArguments();
-				if (args != null && args.length > 2) {
+				if (args != null && args.length > 3) {
 					priority = Integer.parseInt((String) args[0]);
 					localization_x = Integer.parseInt((String) args[1]);
 					localization_y = Integer.parseInt((String) args[2]);
 					System.out.println("The priority is "+priority);
 				}
-				else
+				else {
 					priority=0;
+					localization_x=0;
+					localization_y=0;
+				}
 		// Create and show the GUI 
 //		myGui = new EmergencyGui(this);
 //		myGui.showGui();
@@ -66,7 +69,6 @@ public class Emergency extends Agent {
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType("emergency");
-		sd.setName("JADE-book-trading");
 		dfd.addServices(sd);
 		try {
 			DFService.register(this, dfd);

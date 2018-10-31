@@ -34,12 +34,22 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 public class Ambulance extends Agent {
-	private AID[] emergencygents;
+	private AID[] emergencyAgents;
+	private int localization_x;
+	private int localization_y;
+
 
 	// Put agent initializations here
 	protected void setup() {
 		// Printout a welcome message
-		System.out.println("Resource "+ getAID().getName() +" is ready.");
+		
+		Object[] args = getArguments();
+		if (args != null && args.length > 2) {
+			localization_x = Integer.parseInt((String) args[0]);
+			localization_y = Integer.parseInt((String) args[1]);
+		}
+		
+		System.out.println("Ambulance "+getAID().getName()+" is ready.");
 
 			// Add a TickerBehaviour that schedules a request to emergency agents every minute
 			addBehaviour(new TickerBehaviour(this, 60000) {
@@ -52,10 +62,10 @@ public class Ambulance extends Agent {
 					try {
 						DFAgentDescription[] result = DFService.search(myAgent, template); 
 						System.out.println("Found the following resource agents:");
-						emergencygents = new AID[result.length];
+						emergencyAgents = new AID[result.length];
 						for (int i = 0; i < result.length; ++i) {
-							emergencygents[i] = result[i].getName();
-							System.out.println(emergencygents[i].getName());
+							emergencyAgents[i] = result[i].getName();
+							System.out.println(emergencyAgents[i].getName());
 						}
 					}
 					catch (FIPAException fe) {
@@ -91,8 +101,8 @@ public class Ambulance extends Agent {
 			case 0:
 				// Send the cfp to all emergencies
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-				for (int i = 0; i < emergencygents.length; ++i) {
-					cfp.addReceiver(emergencygents[i]);
+				for (int i = 0; i < emergencyAgents.length; ++i) {
+					cfp.addReceiver(emergencyAgents[i]);
 				} 
 				cfp.setContent("nothing");
 				cfp.setConversationId("emergency");
@@ -118,7 +128,7 @@ public class Ambulance extends Agent {
 						}
 					}
 					repliesCnt++;
-					if (repliesCnt >= emergencygents.length) {
+					if (repliesCnt >= emergencyAgents.length) {
 						// We received all replies
 						step = 2; 
 					}
