@@ -39,6 +39,7 @@ public class Ambulance extends Agent {
 	private int localization_y;
 	private AID[] ambulanceAgents;
 
+
 	// Put agent initializations here
 	protected void setup() {
 		// Printout a welcome message
@@ -70,17 +71,19 @@ public class Ambulance extends Agent {
 		
 		System.out.println("Ambulance "+getAID().getName()+" is ready.");
 
-			// Add a TickerBehaviour that schedules a request to seller agents every minute
+			// Add a TickerBehaviour that schedules a request to emergency agents every minute
 			addBehaviour(new TickerBehaviour(this, 60000) {
 				protected void onTick() {
-					// Update the list of seller agents
+					// Update the list of resources agents
 					DFAgentDescription template = new DFAgentDescription();
 					ServiceDescription sd = new ServiceDescription();
 					sd.setType("emergency");
 					template.addServices(sd);
 					try {
 						DFAgentDescription[] result = DFService.search(myAgent, template); 
+
 						System.out.println("Found the following emergencies:");
+
 						emergencyAgents = new AID[result.length];
 						for (int i = 0; i < result.length; ++i) {
 							emergencyAgents[i] = result[i].getName();
@@ -96,7 +99,6 @@ public class Ambulance extends Agent {
 				}
 			} );
 		}
-	
 	private void listAllAmbulances() {
 		DFAgentDescription template = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
@@ -120,32 +122,38 @@ public class Ambulance extends Agent {
 	}
 
 
+
 	// Put agent clean-up operations here
 	protected void takeDown() {
 		// Printout a dismissal message
 		System.out.println("Ambulance-agent "+getAID().getName()+" terminating.");
+
 	}
 
 	/**
 	   Inner class RequestPerformer.
-	   This is the behaviour used by Book-buyer agents to request seller 
+	   This is the behaviour used by resource agents to request emergencies 
 	   agents the target book.
 	 */
 	private class RequestPerformer extends Behaviour {
-		private AID higherEmergency; // The agent who provides the best offer 
-		private int higherPriority;  // The best offered price
-		private int repliesCnt = 0; // The counter of replies from emergency agents
-		private MessageTemplate mt; // The template to receive replies
+
+		private AID higherEmergency; 	// The agent who has highest priority
+		private int higherPriority;  	// The highest priority
+		private int repliesCnt = 0;		// The counter of replies from emergency agents
+		private MessageTemplate mt; 	// The template to receive replies
+
 		private int step = 0;
 
 		public void action() {
 			switch (step) {
 			case 0:
-				// Send the cfp to all sellers
+				// Send the cfp to all emergencies
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 				for (int i = 0; i < emergencyAgents.length; ++i) {
 					cfp.addReceiver(emergencyAgents[i]);
-				}
+
+				} 
+
 				cfp.setConversationId("emergency");
 				cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
 				myAgent.send(cfp);
@@ -155,7 +163,7 @@ public class Ambulance extends Agent {
 				step = 1;
 				break;
 			case 1:
-				// Receive all proposals/refusals from seller agents
+				// Receive all proposals/refusals from emergencies agents
 				ACLMessage reply = myAgent.receive(mt);
 				if (reply != null) {
 					// Reply received
@@ -163,7 +171,7 @@ public class Ambulance extends Agent {
 						// This is an offer 
 						int priority = Integer.parseInt(reply.getContent());
 						if (higherEmergency == null || priority > higherPriority) {
-							// This is the best offer at present
+							// This is the highest priority at present
 							higherPriority = priority;
 							higherEmergency = reply.getSender();
 						}
@@ -179,7 +187,7 @@ public class Ambulance extends Agent {
 				}
 				break;
 			case 2:
-				// Send the purchase order to the seller that provided the best offer
+				// Send the offer for help to the emergency with higher priority
 				ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 				order.addReceiver(higherEmergency);
 				order.setContent("the ambulance is coming to you sir\n");
@@ -192,18 +200,20 @@ public class Ambulance extends Agent {
 				step = 3;
 				break;
 			case 3:      
-				// Receive the purchase order reply
+				// Receive the reply
 				reply = myAgent.receive(mt);
 				if (reply != null) {
-					// Purchase order reply received
+					// reply received
 					if (reply.getPerformative() == ACLMessage.INFORM) {
 						// Purchase successful. We can terminate
+
 						System.out.println("emergency +"+reply.getSender().getName()+" successfully responded");
 						System.out.println("Priority = "+higherPriority);
+
 						myAgent.doDelete();
 					}
 					else {
-						System.out.println("Attempt failed: requested book already sold.");
+						System.out.println("Attempt failed: emergency already alocated.");
 					}
 
 					step = 4;
