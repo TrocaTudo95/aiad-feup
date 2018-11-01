@@ -37,6 +37,7 @@ public class Ambulance extends Agent {
 	private AID[] emergencyAgents;
 	private int localization_x;
 	private int localization_y;
+	private AID[] ambulanceAgents;
 
 	// Put agent initializations here
 	protected void setup() {
@@ -47,6 +48,25 @@ public class Ambulance extends Agent {
 			localization_x = Integer.parseInt((String) args[0]);
 			localization_y = Integer.parseInt((String) args[1]);
 		}
+		else {
+			localization_x=0;
+			localization_y=0;
+		}
+		
+		// Register the ambulance in the yellow pages
+				DFAgentDescription dfd = new DFAgentDescription();
+				dfd.setName(getAID());
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType("ambulance");
+				dfd.addServices(sd);
+				try {
+					DFService.register(this, dfd);
+				}
+				catch (FIPAException fe) {
+					fe.printStackTrace();
+				}
+				
+				listAllAmbulances();
 		
 		System.out.println("Ambulance "+getAID().getName()+" is ready.");
 
@@ -60,7 +80,7 @@ public class Ambulance extends Agent {
 					template.addServices(sd);
 					try {
 						DFAgentDescription[] result = DFService.search(myAgent, template); 
-						System.out.println("Found the following seller agents:");
+						System.out.println("Found the following emergencies:");
 						emergencyAgents = new AID[result.length];
 						for (int i = 0; i < result.length; ++i) {
 							emergencyAgents[i] = result[i].getName();
@@ -76,17 +96,34 @@ public class Ambulance extends Agent {
 				}
 			} );
 		}
-//		else {
-//			// Make the agent terminate
-//			System.out.println("No target book title specified");
-//			doDelete();
-//		}
-	//}
+	
+	private void listAllAmbulances() {
+		DFAgentDescription template = new DFAgentDescription();
+		ServiceDescription sd = new ServiceDescription();
+		sd.setType("ambulance");
+		template.addServices(sd);
+		try {
+			DFAgentDescription[] result = DFService.search(this, template); 
+			ambulanceAgents = new AID[result.length];
+			for (int i = 0; i < result.length; ++i) {
+				ambulanceAgents[i] = result[i].getName();
+				System.out.println(ambulanceAgents[i].getName());
+			}
+		}
+		catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+	}
+	
+	private void sendDistanceToAmbulances() {
+		
+	}
+
 
 	// Put agent clean-up operations here
 	protected void takeDown() {
 		// Printout a dismissal message
-		System.out.println("Buyer-agent "+getAID().getName()+" terminating.");
+		System.out.println("Ambulance-agent "+getAID().getName()+" terminating.");
 	}
 
 	/**
@@ -97,7 +134,7 @@ public class Ambulance extends Agent {
 	private class RequestPerformer extends Behaviour {
 		private AID higherEmergency; // The agent who provides the best offer 
 		private int higherPriority;  // The best offered price
-		private int repliesCnt = 0; // The counter of replies from seller agents
+		private int repliesCnt = 0; // The counter of replies from emergency agents
 		private MessageTemplate mt; // The template to receive replies
 		private int step = 0;
 
@@ -108,8 +145,7 @@ public class Ambulance extends Agent {
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 				for (int i = 0; i < emergencyAgents.length; ++i) {
 					cfp.addReceiver(emergencyAgents[i]);
-				} 
-				cfp.setContent("nada");
+				}
 				cfp.setConversationId("emergency");
 				cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
 				myAgent.send(cfp);
@@ -163,7 +199,7 @@ public class Ambulance extends Agent {
 					if (reply.getPerformative() == ACLMessage.INFORM) {
 						// Purchase successful. We can terminate
 						System.out.println("emergency +"+reply.getSender().getName()+" successfully responded");
-						System.out.println("Price = "+higherPriority);
+						System.out.println("Priority = "+higherPriority);
 						myAgent.doDelete();
 					}
 					else {
@@ -185,5 +221,21 @@ public class Ambulance extends Agent {
 			}
 			return ((step == 2 && higherEmergency == null) || step == 4);
 		}
-	}  // End of inner class RequestPerformer
+	}// End of inner class RequestPerformer
+		
+	private class InformAmbulances extends Behaviour{
+
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public boolean done() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+		
+	}
 }

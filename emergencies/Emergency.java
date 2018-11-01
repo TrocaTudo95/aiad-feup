@@ -45,10 +45,12 @@ public class Emergency extends Agent {
 
 	// Put agent initializations here
 	protected void setup() {
+		System.out.println("initializing emergency");
 		// Create the catalogue
 		// Get the title of the book to buy as a start-up argument
 				Object[] args = getArguments();
-				if (args != null && args.length > 3) {
+				if (args != null && args.length > 2) {
+					System.out.println(args);
 					priority = Integer.parseInt((String) args[0]);
 					localization_x = Integer.parseInt((String) args[1]);
 					localization_y = Integer.parseInt((String) args[2]);
@@ -63,7 +65,7 @@ public class Emergency extends Agent {
 //		myGui = new EmergencyGui(this);
 //		myGui.showGui();
 
-		// Register the book-selling service in the yellow pages
+		// Register the emergency in the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
@@ -115,7 +117,6 @@ public class Emergency extends Agent {
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				// CFP Message received. Process it
-				String title = msg.getContent();
 				ACLMessage reply = msg.createReply();
 
 				//Integer price = (Integer) catalogue.get(title);
