@@ -71,6 +71,7 @@ public class Emergency extends Agent {
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType("emergency");
+		sd.setName("teste");
 		dfd.addServices(sd);
 		try {
 			DFService.register(this, dfd);
@@ -82,7 +83,6 @@ public class Emergency extends Agent {
 		// Add the behaviour serving queries from buyer agents
 		addBehaviour(new OfferRequestsServer());
 
-		// Add the behaviour serving purchase orders from buyer agents
 		// Add the behaviour serving purchase orders from buyer agents
 		addBehaviour(new PurchaseOrdersServer());
 	}
@@ -97,7 +97,7 @@ public class Emergency extends Agent {
 			fe.printStackTrace();
 		}
 		// Printout a dismissal message
-		System.out.println("Seller-agent "+getAID().getName()+" terminating.");
+		System.out.println("Emergency "+getAID().getName()+" atended.");
 	}
 
 	/**
@@ -147,6 +147,7 @@ public class Emergency extends Agent {
 	   purchase has been sucesfully completed.
 	 */
 	private class PurchaseOrdersServer extends CyclicBehaviour {
+		Boolean served=false;
 		public void action() {
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
 			ACLMessage msg = myAgent.receive(mt);
@@ -157,13 +158,14 @@ public class Emergency extends Agent {
 				//if (price != null) {
 					reply.setPerformative(ACLMessage.INFORM);
 					System.out.println(title+"atended by ambulance "+msg.getSender().getName());
-			//	}
+				served=true;
 //				else {
 //					// The requested book has been sold to another buyer in the meanwhile .
 //					reply.setPerformative(ACLMessage.FAILURE);
 //					reply.setContent("not-available");
 //				}
 				myAgent.send(reply);
+				myAgent.doDelete();
 			}
 			else {
 				block();

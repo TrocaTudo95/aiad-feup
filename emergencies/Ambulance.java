@@ -23,11 +23,15 @@ Boston, MA  02111-1307, USA.
 
 package emergencies;
 
+
+import java.io.IOException;
+import java.util.ArrayList;
 import jade.core.Agent;
 import jade.core.AID;
 import jade.core.behaviours.*;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -38,6 +42,8 @@ public class Ambulance extends Agent {
 	private int localization_x;
 	private int localization_y;
 	private AID[] ambulanceAgents;
+	private EmergencyMessage informationMessage;
+	private ArrayList <EmergencyMessage> ambulancesLocalization= new ArrayList<EmergencyMessage>();
 
 
 	// Put agent initializations here
@@ -54,11 +60,13 @@ public class Ambulance extends Agent {
 			localization_y=0;
 		}
 		
+		informationMessage= new EmergencyMessage(0,localization_x,localization_y, getAID());
 		// Register the ambulance in the yellow pages
 				DFAgentDescription dfd = new DFAgentDescription();
 				dfd.setName(getAID());
 				ServiceDescription sd = new ServiceDescription();
 				sd.setType("ambulance");
+				sd.setName("PAM");
 				dfd.addServices(sd);
 				try {
 					DFService.register(this, dfd);
@@ -67,14 +75,14 @@ public class Ambulance extends Agent {
 					fe.printStackTrace();
 				}
 				
-				listAllAmbulances();
-		
+			
 		System.out.println("Ambulance "+getAID().getName()+" is ready.");
-
+		
 			// Add a TickerBehaviour that schedules a request to emergency agents every minute
 			addBehaviour(new TickerBehaviour(this, 60000) {
 				protected void onTick() {
 					// Update the list of resources agents
+					listAllAmbulances();
 					DFAgentDescription template = new DFAgentDescription();
 					ServiceDescription sd = new ServiceDescription();
 					sd.setType("emergency");
@@ -95,6 +103,7 @@ public class Ambulance extends Agent {
 					}
 
 					// Perform the request
+					listAllAmbulances();
 					myAgent.addBehaviour(new RequestPerformer());
 				}
 			} );
@@ -117,9 +126,7 @@ public class Ambulance extends Agent {
 		}
 	}
 	
-	private void sendDistanceToAmbulances() {
-		
-	}
+
 
 
 
@@ -227,7 +234,7 @@ public class Ambulance extends Agent {
 
 		public boolean done() {
 			if (step == 2 && higherEmergency == null) {
-				System.out.println("Attempt failed: "+" not available for sale");
+				System.out.println("Attempt failed: "+" there aren't emergencies");
 			}
 			return ((step == 2 && higherEmergency == null) || step == 4);
 		}
@@ -235,10 +242,45 @@ public class Ambulance extends Agent {
 		
 	private class InformAmbulances extends Behaviour{
 
+		private MessageTemplate mt;
+		
 		@Override
 		public void action() {
-			// TODO Auto-generated method stub
+			// Send the information about this ambulance to all ambulances
+			ACLMessage inf = new ACLMessage(ACLMessage.INFORM);
+			for (int i = 0; i < ambulanceAgents.length; ++i) {
+				inf.addReceiver(ambulanceAgents[i]);
+
+			} 
+
+			inf.setConversationId("ambulances_inf");
+			try {
+				inf.setContentObject(informationMessage);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			inf.setReplyWith("inf"+System.currentTimeMillis()); // Unique value
+			myAgent.send(inf);
+			// Prepare the template to get proposals
+			mt = MessageTemplate.and(MessageTemplate.MatchConversationId("ambulances_inf"),
+					MessageTemplate.MatchInReplyTo(inf.getReplyWith()));
 			
+			int repliesCount=0;
+			
+			while(repliesCount<ambulanceAgents.length) {
+				ACLMessage reply = myAgent.receive(mt);
+				if (reply != null) {
+					try {
+						ambulancesLocalization.add((EmergencyMessage) reply.getContentObject());
+						repliesCount++;
+					} catch (UnreadableException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		
+			myAgent.addBehaviour(new RequestPerformer());
 		}
 
 		@Override

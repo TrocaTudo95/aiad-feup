@@ -2,15 +2,34 @@ package emergencies;
 
 import java.io.Serializable;
 
-public class EmergencyMessage implements Serializable {
+import jade.core.AID;
 
+public class EmergencyMessage implements Serializable {
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		EmergencyMessage other = (EmergencyMessage) obj;
+		if (x != other.x)
+			return false;
+		if (y != other.y)
+			return false;
+		return true;
+	}
 	private int priority;
 	private int x;
 	private int y;
-	public EmergencyMessage(int priority, int x, int y) {
+	private AID senderID;
+	
+	public EmergencyMessage(int priority, int x,int y, AID id ) {
 		this.priority = priority;
 		this.x = x;
 		this.y = y;
+		this.senderID=id;
 	}
 	public int getPriority() {
 		return priority;
