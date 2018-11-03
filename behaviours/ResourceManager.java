@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import emergencies.Ambulance;
 import emergencies.EmergencyMessage;
 import jade.core.AID;
-import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -16,9 +15,18 @@ public class ResourceManager{
 	
 	Ambulance resource_agent;
 	Boolean ready = false;
+	private ArrayList <EmergencyMessage> resource_positions= new ArrayList<EmergencyMessage>();
 	
 	public ResourceManager(Ambulance resource_agent) {
 		this.resource_agent= resource_agent;
+	}
+	
+	public double calculateDistance(EmergencyMessage ambulance, EmergencyMessage emergency) {
+		return Math.sqrt(Math.pow(ambulance.getX()-emergency.getX(), 2)+Math.pow(ambulance.getY()-emergency.getY(), 2));
+	}
+	
+	public boolean closestAmbulance(EmergencyMessage emergency) {
+		return true;
 	}
 	
 	public class RequestPerformer extends Behaviour {
@@ -100,8 +108,9 @@ public class ResourceManager{
 					else {
 						System.out.println("Attempt failed: emergency already alocated.");
 					}
-
+					
 					step = 4;
+					
 				}
 				else {
 					block();
@@ -125,7 +134,7 @@ public class ResourceManager{
 		private MessageTemplate mt;
 		private int step = 0;
 		
-		private ArrayList <EmergencyMessage> resource_positions= new ArrayList<EmergencyMessage>();
+	
 		private int replies_cnt =0;
 		
 		@Override
@@ -142,8 +151,8 @@ public class ResourceManager{
 
 				inf.setConversationId("resource_inf");
 				try {
-					inf.setContentObject(new EmergencyMessage(0,resource_agent.getX(),resource_agent.getY(), resource_agent.getAID()));
-				} catch (IOException e) {
+					inf.setContentObject(resource_agent.getMessage());
+				} catch (IOException e) { 
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -172,7 +181,7 @@ public class ResourceManager{
 					}
 		
 					if (replies_cnt >= resource_agent.getResourceAgents().length) {
-
+						myAgent.addBehaviour(new RequestPerformer());
 						ready =true;
 						step = 2; 
 					

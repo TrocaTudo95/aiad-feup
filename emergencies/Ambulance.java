@@ -12,6 +12,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 public class Ambulance extends Agent {
 	private int position_x;
 	private int position_y;
+	public EmergencyMessage em;
 	
 	private AID[] emergency_agents;
 	private AID[] resource_agents;
@@ -34,7 +35,7 @@ public class Ambulance extends Agent {
 		
 		System.out.println("Ambulance " + getAID().getName() + " is ready.");
 		System.out.println("Coordinates: (" + position_x + "," + position_y + ")\n");
-		
+		em=new EmergencyMessage(0,position_x,position_y,getAID());
 		manager = new ResourceManager(this);
 		// Register the ambulance in the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -58,8 +59,9 @@ public class Ambulance extends Agent {
 				setResourceAgents(listAllAgents("ambulance"));
 				setEmergencyAgents(listAllAgents("emergency"));
 				
-				myAgent.addBehaviour(manager.new RequestPerformer());
+				
 				myAgent.addBehaviour(manager.new InformAmbulances());
+				
 			}
 		});
 	}
@@ -133,6 +135,10 @@ public class Ambulance extends Agent {
 	
 	public int getY() {
 		return position_y;
+	}
+	
+	public EmergencyMessage getMessage() {
+		return em;
 	}
 	
 	public boolean checkDistance() {
