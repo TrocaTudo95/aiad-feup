@@ -44,7 +44,7 @@ public class Emergency extends Agent {
 	protected void setup() {
 
 		Object[] args = getArguments();
-		if (args != null && args.length > 2) {
+		if (args != null && args.length == 3) {
 			priority = Integer.parseInt((String) args[0]);
 			position_x = Integer.parseInt((String) args[1]);
 			position_y = Integer.parseInt((String) args[2]);
@@ -55,7 +55,7 @@ public class Emergency extends Agent {
 			position_y=0;
 		}
 		
-		System.out.println("\nNew Emergengy");
+		System.out.println("New Emergengy " + getAID().getName());
 		System.out.println("Priority: " + priority);
 		System.out.println("Coordinates: (" + position_x + "," + position_y + ")\n");
 				
