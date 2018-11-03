@@ -36,35 +36,33 @@ import java.util.*;
 
 public class Emergency extends Agent {
 
-	
-	//private Hashtable catalogue;
+	private static final long serialVersionUID = 1L;
 	private int priority;
-	private int localization_x;
-	private int localization_y;
-	// The GUI by means of which the user can add books in the catalogue
-	//private EmergencyGui myGui;
-
-	// Put agent initializations here
+	private int position_x;
+	private int position_y;
+	
 	protected void setup() {
-		System.out.println("initializing emergency");
-		// Create the catalogue
-		// Get the title of the book to buy as a start-up argument
-				Object[] args = getArguments();
-				if (args != null && args.length > 2) {
-					System.out.println(args);
-					priority = Integer.parseInt((String) args[0]);
-					localization_x = Integer.parseInt((String) args[1]);
-					localization_y = Integer.parseInt((String) args[2]);
-					System.out.println("The priority is "+priority);
-				}
-				else {
-					priority=0;
-					localization_x=0;
-					localization_y=0;
-				}
+
+		Object[] args = getArguments();
+		if (args != null && args.length > 2) {
+			priority = Integer.parseInt((String) args[0]);
+			position_x = Integer.parseInt((String) args[1]);
+			position_y = Integer.parseInt((String) args[2]);
+		}
+		else {
+			priority=0;
+			position_x=0;
+			position_y=0;
+		}
+		
+		System.out.println("\nNew Emergengy");
+		System.out.println("Priority: " + priority);
+		System.out.println("Coordinates: (" + position_x + "," + position_y + ")\n");
+				
+		
 		// Create and show the GUI 
-//		myGui = new EmergencyGui(this);
-//		myGui.showGui();
+		// myGui = new EmergencyGui(this);
+		// myGui.showGui();
 
 		// Register the emergency in the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -80,10 +78,7 @@ public class Emergency extends Agent {
 			fe.printStackTrace();
 		}
 
-		// Add the behaviour serving queries from buyer agents
 		addBehaviour(new OfferRequestsServer());
-
-		// Add the behaviour serving purchase orders from buyer agents
 		addBehaviour(new PurchaseOrdersServer());
 	}
 
@@ -100,18 +95,7 @@ public class Emergency extends Agent {
 		System.out.println("Emergency "+getAID().getName()+" atended.");
 	}
 
-	/**
-     This is invoked by the GUI when the user adds a new book for sale
-	 */
-
-	/**
-	   Inner class OfferRequestsServer.
-	   This is the behaviour used by Book-seller agents to serve incoming requests 
-	   for offer from buyer agents.
-	   If the requested book is in the local catalogue the seller agent replies 
-	   with a PROPOSE message specifying the price. Otherwise a REFUSE message is
-	   sent back.
-	 */
+	
 	private class OfferRequestsServer extends CyclicBehaviour {
 		public void action() {
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
@@ -120,16 +104,9 @@ public class Emergency extends Agent {
 				// CFP Message received. Process it
 				ACLMessage reply = msg.createReply();
 
-				//Integer price = (Integer) catalogue.get(title);
-					// The requested book is available for sale. Reply with the price
-					reply.setPerformative(ACLMessage.PROPOSE);
-					reply.setContent(String.valueOf(priority));
-				
-//				else {
-//					// The requested book is NOT available for sale.
-//					reply.setPerformative(ACLMessage.REFUSE);
-//					reply.setContent("not-available");
-//				}
+				reply.setPerformative(ACLMessage.PROPOSE);
+				reply.setContent(String.valueOf(priority));
+			
 				myAgent.send(reply);
 			}
 			else {
@@ -138,14 +115,6 @@ public class Emergency extends Agent {
 		}
 	}  // End of inner class OfferRequestsServer
 
-	/**
-	   Inner class PurchaseOrdersServer.
-	   This is the behaviour used by Book-seller agents to serve incoming 
-	   offer acceptances (i.e. purchase orders) from buyer agents.
-	   The seller agent removes the purchased book from its catalogue 
-	   and replies with an INFORM message to notify the buyer that the
-	   purchase has been sucesfully completed.
-	 */
 	private class PurchaseOrdersServer extends CyclicBehaviour {
 		Boolean served=false;
 		public void action() {
@@ -155,15 +124,10 @@ public class Emergency extends Agent {
 				// ACCEPT_PROPOSAL Message received. Process it
 				String title = msg.getContent();
 				ACLMessage reply = msg.createReply();
-				//if (price != null) {
-					reply.setPerformative(ACLMessage.INFORM);
-					System.out.println(title+"atended by ambulance "+msg.getSender().getName());
+
+				reply.setPerformative(ACLMessage.INFORM);
 				served=true;
-//				else {
-//					// The requested book has been sold to another buyer in the meanwhile .
-//					reply.setPerformative(ACLMessage.FAILURE);
-//					reply.setContent("not-available");
-//				}
+
 				myAgent.send(reply);
 				myAgent.doDelete();
 			}

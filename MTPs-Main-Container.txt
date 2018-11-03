@@ -1,1 +1,1 @@
-http://pc:7778/acc
+http://pc.lan:7778/acc
