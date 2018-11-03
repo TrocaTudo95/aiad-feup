@@ -41,8 +41,10 @@ public class Ambulance extends Agent {
 	private int position_x;
 	private int position_y;
 	
-	private AID[] emergencyAgents;
-	private AID[] ambulanceAgents;
+	private AID[] emergency_agents;
+	private AID[] resource_agents;
+	
+	private Boolean ready =false;
 	
 
 	protected void setup() {
@@ -79,8 +81,8 @@ public class Ambulance extends Agent {
 		addBehaviour(new TickerBehaviour(this, 60000) {
 			protected void onTick() {
 				
-				ambulanceAgents = listAllAgents("ambulance");
-				emergencyAgents = listAllAgents("emergency");
+				resource_agents = listAllAgents("ambulance");
+				emergency_agents = listAllAgents("emergency");
 				myAgent.addBehaviour(new RequestPerformer());
 				myAgent.addBehaviour(new InformAmbulances());
 			}
@@ -143,8 +145,8 @@ public class Ambulance extends Agent {
 			case 0:
 				// Send the cfp to all emergencies
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-				for (int i = 0; i < emergencyAgents.length; ++i) {
-					cfp.addReceiver(emergencyAgents[i]);
+				for (int i = 0; i < emergency_agents.length; ++i) {
+					cfp.addReceiver(emergency_agents[i]);
 
 				} 
 
@@ -171,7 +173,7 @@ public class Ambulance extends Agent {
 						}
 					}
 					repliesCnt++;
-					if (repliesCnt >= emergencyAgents.length) {
+					if (repliesCnt >= emergency_agents.length) {
 						// We received all replies
 						step = 2; 
 					}
@@ -181,17 +183,19 @@ public class Ambulance extends Agent {
 				}
 				break;
 			case 2:
-				// Send the offer for help to the emergency with higher priority
-				ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-				order.addReceiver(higherEmergency);
-				order.setContent("the ambulance is coming to you sir\n");
-				order.setConversationId("emergency");
-				order.setReplyWith("order"+System.currentTimeMillis());
-				myAgent.send(order);
-				// Prepare the template to get the purchase order reply
-				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("emergency"),
-						MessageTemplate.MatchInReplyTo(order.getReplyWith()));
-				step = 3;
+				if(ready) {
+					// Send the offer for help to the emergency with higher priority
+					ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+					order.addReceiver(higherEmergency);
+					order.setContent("the ambulance is coming to you sir\n");
+					order.setConversationId("emergency");
+					order.setReplyWith("order"+System.currentTimeMillis());
+					myAgent.send(order);
+					// Prepare the template to get the purchase order reply
+					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("emergency"),
+							MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+					step = 3;
+				}
 				break;
 			case 3:      
 				// Receive the reply
@@ -228,8 +232,8 @@ public class Ambulance extends Agent {
 		private MessageTemplate mt;
 		private int step = 0;
 		
-		private ArrayList <EmergencyMessage> ambulancesLocalization= new ArrayList<EmergencyMessage>();
-		private int replies_cnt;
+		private ArrayList <EmergencyMessage> resource_positions= new ArrayList<EmergencyMessage>();
+		private int replies_cnt =0;
 		
 		@Override
 		public void action() {
@@ -238,8 +242,8 @@ public class Ambulance extends Agent {
 			case 0:
 				// Send the information to all resources
 				ACLMessage inf = new ACLMessage(ACLMessage.INFORM);
-				for (int i = 0; i < ambulanceAgents.length; ++i) {
-					inf.addReceiver(ambulanceAgents[i]);
+				for (int i = 0; i < resource_agents.length; ++i) {
+					inf.addReceiver(resource_agents[i]);
 
 				} 
 
@@ -254,19 +258,20 @@ public class Ambulance extends Agent {
 				inf.setReplyWith("inf"+System.currentTimeMillis()); // Unique value
 				myAgent.send(inf);
 				
-				// Prepare the template to get proposals
-				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("resource_inf"),
-						MessageTemplate.MatchInReplyTo(inf.getReplyWith()));
 				step = 1;
 				break;
 			case 1:
-				// Receive all proposals/refusals from emergencies agents
+				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("resource_inf"),
+						MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+				
 				ACLMessage reply = myAgent.receive(mt);
 				if (reply != null) {
+
 					// Reply received
 					if (reply.getPerformative() == ACLMessage.INFORM) {
 						try {
-							ambulancesLocalization.add((EmergencyMessage) reply.getContentObject());
+							resource_positions.add((EmergencyMessage) reply.getContentObject());
+							System.out.print("x: " + resource_positions.get(resource_positions.size()-1).getX());
 						} catch (UnreadableException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -274,8 +279,9 @@ public class Ambulance extends Agent {
 						replies_cnt++;
 					}
 		
-					if (replies_cnt >= emergencyAgents.length) {
-						// We received all replies
+					if (replies_cnt >= resource_agents.length) {
+
+						ready =true;
 						step = 2; 
 					}
 				}
@@ -283,6 +289,7 @@ public class Ambulance extends Agent {
 					block();
 				}
 				break;
+				
 			default:
 				break;
 			}
@@ -290,12 +297,14 @@ public class Ambulance extends Agent {
 	
 			
 		}
+		
 
 		@Override
 		public boolean done() {
 			// TODO Auto-generated method stub
 			return false;
 		}
+		
 		
 	}
 }
