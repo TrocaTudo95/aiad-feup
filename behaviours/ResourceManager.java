@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import emergencies.Ambulance;
 import emergencies.EmergencyMessage;
 import jade.core.AID;
+import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -24,9 +25,21 @@ public class ResourceManager{
 		return Math.sqrt(Math.pow(ambulance.getX()-emergency.getX(), 2)+Math.pow(ambulance.getY()-emergency.getY(), 2));
 	}
 	
-	public boolean closestAmbulance(EmergencyMessage emergency) {
+
+	private boolean checkDistance(EmergencyMessage emergency) {
+		double my_distance = calculateDistance(resource_agent.getMessage(),emergency);
+		
+		for(int i =0; i < resource_positions.size(); i++) {
+			double resource_distance = calculateDistance(resource_positions.get(i), emergency);
+			
+			if(resource_distance < my_distance)
+				return false;
+		}
+		
 		return true;
 	}
+
+	
 	
 	public class RequestPerformer extends Behaviour {
 
@@ -71,9 +84,10 @@ public class ResourceManager{
 						int priority = emergency.getPriority();
 						
 						if (higherEmergency == null || priority > higherPriority) {
-							// This is the highest priority at present
-							higherPriority = priority;
-							higherEmergency = reply.getSender();
+							if(checkDistance(emergency)) {
+								higherPriority = priority;
+								higherEmergency = reply.getSender();
+							}
 						}
 					}
 					repliesCnt++;
@@ -123,7 +137,6 @@ public class ResourceManager{
 		}
 
 	
-
 		public boolean done() {
 			if (step == 2 && higherEmergency == null) {
 				System.out.println("Attempt failed: "+" there aren't emergencies");
@@ -149,7 +162,6 @@ public class ResourceManager{
 				ACLMessage inf = new ACLMessage(ACLMessage.INFORM);
 				for (int i = 0; i < resource_agent.getResourceAgents().length; ++i) {
 					inf.addReceiver(resource_agent.getResourceAgents()[i]);
-
 				} 
 
 				inf.setConversationId("resource_inf");

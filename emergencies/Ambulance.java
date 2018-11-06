@@ -18,7 +18,7 @@ public class Ambulance extends Agent {
 	private AID[] emergency_agents;
 	private AID[] resource_agents;
 	
-	public EmergencyMessage message;
+	private EmergencyMessage message;
 	private ResourceManager manager;
 	
 
@@ -37,7 +37,7 @@ public class Ambulance extends Agent {
 		System.out.println("Ambulance " + getAID().getName() + " is ready.");
 		System.out.println("Coordinates: (" + position_x + "," + position_y + ")\n");
 		
-		message=new EmergencyMessage(0,position_x,position_y,getAID());
+		message = new EmergencyMessage(0,position_x,position_y,getAID());
 		manager = new ResourceManager(this);
 		
 		// Register the ambulance in the yellow pages
