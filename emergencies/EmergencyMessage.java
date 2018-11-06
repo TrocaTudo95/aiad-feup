@@ -31,21 +31,34 @@ public class EmergencyMessage implements Serializable {
 		this.y = y;
 		this.senderID=id;
 	}
+	
+	public EmergencyMessage() {
+		this.priority = 0;
+		this.x = 0;
+		this.y = 0;
+		this.senderID= null;
+	}
+	
 	public int getPriority() {
 		return priority;
 	}
+	
 	public void setPriority(int priority) {
 		this.priority = priority;
 	}
+	
 	public int getX() {
 		return x;
 	}
+	
 	public void setX(int x) {
 		this.x = x;
 	}
+	
 	public int getY() {
 		return y;
 	}
+	
 	public void setY(int y) {
 		this.y = y;
 	}

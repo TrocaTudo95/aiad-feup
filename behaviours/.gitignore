@@ -4,3 +4,6 @@
 /ResourceManager$InformAmbulances.class
 /ResourceManager$RequestPerformer.class
 /ResourceManager.class
+/EmergencyManager.class
+/EmergencyManager$OfferRequestsServer.class
+/EmergencyManager$PurchaseOrdersServer.class

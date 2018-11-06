@@ -14,7 +14,6 @@ import jade.lang.acl.UnreadableException;
 public class ResourceManager{
 	
 	Ambulance resource_agent;
-	Boolean ready = false;
 	private ArrayList <EmergencyMessage> resource_positions= new ArrayList<EmergencyMessage>();
 	
 	public ResourceManager(Ambulance resource_agent) {
@@ -57,13 +56,20 @@ public class ResourceManager{
 				step = 1;
 				break;
 			case 1:
-				// Receive all proposals/refusals from emergencies agents
 				ACLMessage reply = myAgent.receive(mt);
 				if (reply != null) {
-					// Reply received
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
-						// This is an offer 
-						int priority = Integer.parseInt(reply.getContent());
+						
+						EmergencyMessage  emergency = new EmergencyMessage();
+						
+						try {
+							emergency = (EmergencyMessage) reply.getContentObject();
+						} catch (UnreadableException e) {
+							e.printStackTrace();
+						}
+						
+						int priority = emergency.getPriority();
+						
 						if (higherEmergency == null || priority > higherPriority) {
 							// This is the highest priority at present
 							higherPriority = priority;
@@ -80,9 +86,7 @@ public class ResourceManager{
 					block();
 				}
 				break;
-			case 2:
-				if(ready && resource_agent.checkDistance()) {
-					
+			case 2:		
 					// Send the offer for help to the emergency with higher priority
 					ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 					order.addReceiver(higherEmergency);
@@ -94,7 +98,6 @@ public class ResourceManager{
 					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("emergency"),
 							MessageTemplate.MatchInReplyTo(order.getReplyWith()));
 					step = 3;
-				}
 				break;
 			case 3:      
 				// Receive the reply
@@ -182,9 +185,7 @@ public class ResourceManager{
 		
 					if (replies_cnt >= resource_agent.getResourceAgents().length) {
 						myAgent.addBehaviour(new RequestPerformer());
-						ready =true;
 						step = 2; 
-					
 				}}
 				else {
 					block();

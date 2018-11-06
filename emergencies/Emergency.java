@@ -32,14 +32,24 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
+
+import behaviours.EmergencyManager;
+import behaviours.ResourceManager;
+import behaviours.ResourceManager.InformAmbulances;
 
 public class Emergency extends Agent {
 
 	private static final long serialVersionUID = 1L;
+
 	private int priority;
 	private int position_x;
 	private int position_y;
+	
+	private EmergencyManager manager;
+	private EmergencyMessage message;
 	
 	protected void setup() {
 
@@ -58,8 +68,10 @@ public class Emergency extends Agent {
 		System.out.println("New Emergengy " + getAID().getName());
 		System.out.println("Priority: " + priority);
 		System.out.println("Coordinates: (" + position_x + "," + position_y + ")\n");
-				
 		
+		message = new EmergencyMessage(priority,position_x,position_y,getAID());
+		manager = new EmergencyManager(this);
+				
 		// Create and show the GUI 
 		// myGui = new EmergencyGui(this);
 		// myGui.showGui();
@@ -77,9 +89,9 @@ public class Emergency extends Agent {
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
-
-		addBehaviour(new OfferRequestsServer());
-		addBehaviour(new PurchaseOrdersServer());
+		
+		addBehaviour(manager.new OfferRequestsServer());
+		addBehaviour(manager.new PurchaseOrdersServer());
 	}
 
 	// Put agent clean-up operations here
@@ -95,45 +107,10 @@ public class Emergency extends Agent {
 		System.out.println("Emergency "+getAID().getName()+" atended.");
 	}
 
+	public Serializable getMessage() {
+		return message;
+	}
+
 	
-	private class OfferRequestsServer extends CyclicBehaviour {
-		public void action() {
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
-			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null) {
-				// CFP Message received. Process it
-				ACLMessage reply = msg.createReply();
-
-				reply.setPerformative(ACLMessage.PROPOSE);
-				reply.setContent(String.valueOf(priority));
-			
-				myAgent.send(reply);
-			}
-			else {
-				block();
-			}
-		}
-	}  // End of inner class OfferRequestsServer
-
-	private class PurchaseOrdersServer extends CyclicBehaviour {
-		Boolean served=false;
-		public void action() {
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
-			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null) {
-				// ACCEPT_PROPOSAL Message received. Process it
-				String title = msg.getContent();
-				ACLMessage reply = msg.createReply();
-
-				reply.setPerformative(ACLMessage.INFORM);
-				served=true;
-
-				myAgent.send(reply);
-				myAgent.doDelete();
-			}
-			else {
-				block();
-			}
-		}
-	}  // End of inner class OfferRequestsServer
+	
 }
