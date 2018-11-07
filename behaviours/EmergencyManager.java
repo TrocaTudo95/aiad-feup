@@ -9,17 +9,21 @@ import jade.lang.acl.MessageTemplate;
 
 public class EmergencyManager {
 	Emergency emergency_agent;
+	private boolean being_solved=false;
 	
 	public EmergencyManager(Emergency emergency_agent) {
 		this.emergency_agent= emergency_agent;
 	}
 	
 	public class OfferRequestsServer extends CyclicBehaviour {
+		
+		private int step = 0;
 		public void action() {
+			switch(step) {
+			case 0:
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
 			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null) {
-				// CFP Message received. Process it
+			if (msg != null && !being_solved) {
 				ACLMessage reply = msg.createReply();
 
 				reply.setPerformative(ACLMessage.PROPOSE);
@@ -31,12 +35,26 @@ public class EmergencyManager {
 				}
 			
 				myAgent.send(reply);
+				step=1;
 			}
 			else {
 				block();
 			}
+			break;
+			case 1:
+				MessageTemplate mt2 = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+				ACLMessage msg2 = myAgent.receive(mt2);
+				if (msg2 != null) {
+					being_solved=true;
+				}
+				else {
+					block();
+				}
+				break;
+				
 		}
-	}  // End of inner class OfferRequestsServer
+	} 
+	}// End of inner class OfferRequestsServer
 
 	public class PurchaseOrdersServer extends CyclicBehaviour {
 		Boolean served=false;

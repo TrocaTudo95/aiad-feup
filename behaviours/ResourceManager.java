@@ -16,13 +16,17 @@ public class ResourceManager{
 	
 	Ambulance resource_agent;
 	private ArrayList <EmergencyMessage> resource_positions= new ArrayList<EmergencyMessage>();
-	
+	private Pair<Double, Double> hospital=new Pair(2,3);
 	public ResourceManager(Ambulance resource_agent) {
 		this.resource_agent= resource_agent;
 	}
 	
 	public double calculateDistance(EmergencyMessage ambulance, EmergencyMessage emergency) {
 		return Math.sqrt(Math.pow(ambulance.getX()-emergency.getX(), 2)+Math.pow(ambulance.getY()-emergency.getY(), 2));
+	}
+	
+	public double distanceHospital() {
+		return 0;
 	}
 	
 
@@ -189,7 +193,6 @@ public class ResourceManager{
 						try {
 							resource_positions.add((EmergencyMessage) reply.getContentObject());
 						} catch (UnreadableException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						replies_cnt++;

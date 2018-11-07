@@ -14,7 +14,12 @@ public class Ambulance extends Agent {
 	private static final long serialVersionUID = 1L;
 	private int position_x;
 	private int position_y;
+	private int speed;
 	
+	public int getSpeed() {
+		return speed;
+	}
+
 	private AID[] emergency_agents;
 	private AID[] resource_agents;
 	
