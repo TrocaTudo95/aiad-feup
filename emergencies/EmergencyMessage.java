@@ -5,6 +5,11 @@ import java.io.Serializable;
 import jade.core.AID;
 
 public class EmergencyMessage implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -24,7 +29,20 @@ public class EmergencyMessage implements Serializable {
 	private int x;
 	private int y;
 	private AID senderID;
+	private int time_to_respond;
 	
+	public int getTime_to_respond() {
+		return time_to_respond;
+	}
+
+	public void setTime_to_respond(int time_to_respond) {
+		this.time_to_respond = time_to_respond;
+	}
+
+	public AID getSenderID() {
+		return senderID;
+	}
+
 	public EmergencyMessage(int priority, int x,int y, AID id ) {
 		this.priority = priority;
 		this.x = x;

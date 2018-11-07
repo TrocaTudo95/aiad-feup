@@ -24,6 +24,18 @@ public class Ambulance extends Agent {
 	private AID[] resource_agents;
 	
 	private EmergencyMessage message;
+	private EmergencyMessage current_emergency;
+	
+	
+	public EmergencyMessage getCurrent_emergency() {
+		return current_emergency;
+	}
+
+
+	public void setCurrent_emergency(EmergencyMessage current_emergency) {
+		this.current_emergency = current_emergency;
+	}
+
 	private ResourceManager manager;
 	
 

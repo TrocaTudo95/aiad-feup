@@ -2,12 +2,14 @@ package behaviours;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import emergencies.Ambulance;
 import emergencies.EmergencyMessage;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
@@ -15,33 +17,47 @@ import jade.lang.acl.UnreadableException;
 public class ResourceManager{
 	
 	Ambulance resource_agent;
-	private ArrayList <EmergencyMessage> resource_positions= new ArrayList<EmergencyMessage>();
+	
 	private Pair<Double, Double> hospital=new Pair(2,3);
+	private EmergencyMessage emergency;
 	public ResourceManager(Ambulance resource_agent) {
 		this.resource_agent= resource_agent;
 	}
 	
-	public double calculateDistance(EmergencyMessage ambulance, EmergencyMessage emergency) {
-		return Math.sqrt(Math.pow(ambulance.getX()-emergency.getX(), 2)+Math.pow(ambulance.getY()-emergency.getY(), 2));
+	public double calculateTime(EmergencyMessage ambulance, EmergencyMessage emergency) {
+		double time=0;
+		double distance_to_emergency = Math.sqrt(Math.pow(ambulance.getX()-emergency.getX(), 2)+Math.pow(ambulance.getY()-emergency.getY(), 2));
+		double distance_to_hospital = distanceHospital(emergency);
+		time = (distance_to_emergency + distance_to_hospital) * resource_agent.getSpeed();
+			if(resource_agent.getCurrent_emergency()!=null) {
+				time+=2;//TODO:tempo atual que falta para acabar a emergência
+			}
+			Random rand = new Random();
+
+			int  time_in_hospital = rand.nextInt(3) + 1;
+			time+= time_in_hospital;
+			
+		
+		return time;
 	}
 	
-	public double distanceHospital() {
-		return 0;
+	public double distanceHospital(EmergencyMessage emergency) {
+		return Math.sqrt(Math.pow(hospital.getX()-emergency.getX(), 2)+Math.pow(hospital.getY()-emergency.getY(), 2));
 	}
 	
 
-	private boolean checkDistance(EmergencyMessage emergency) {
-		double my_distance = calculateDistance(resource_agent.getMessage(),emergency);
-		
-		for(int i =0; i < resource_positions.size(); i++) {
-			double resource_distance = calculateDistance(resource_positions.get(i), emergency);
-			
-			if(resource_distance < my_distance)
-				return false;
-		}
-		
-		return true;
-	}
+//	private boolean checkDistance(EmergencyMessage emergency) {
+//		double my_distance = calculateTime(resource_agent.getMessage(),emergency);
+//		
+//		for(int i =0; i < resource_positions.size(); i++) {
+//			double resource_distance = calculateTime(resource_positions.get(i), emergency);
+//			
+//			if(resource_distance < my_distance)
+//				return false;
+//		}
+//		
+//		return true;
+//	}
 
 	
 	
@@ -149,10 +165,15 @@ public class ResourceManager{
 		}
 	}// End of inner class RequestPerformer
 		
-	public class InformAmbulances extends Behaviour{
+	public class InformAmbulances extends CyclicBehaviour{
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private MessageTemplate mt;
 		private int step = 0;
+		private ArrayList <EmergencyMessage> resource_positions= new ArrayList<EmergencyMessage>();
 		
 	
 		private int replies_cnt =0;
@@ -163,16 +184,16 @@ public class ResourceManager{
 			switch (step) {
 			case 0:
 				// Send the information to all resources
-				ACLMessage inf = new ACLMessage(ACLMessage.INFORM);
+				ACLMessage inf = new ACLMessage(ACLMessage.CFP);
 				for (int i = 0; i < resource_agent.getResourceAgents().length; ++i) {
+					if(!resource_agent.getResourceAgents()[i].equals(myAgent.getAID()))
 					inf.addReceiver(resource_agent.getResourceAgents()[i]);
 				} 
 
 				inf.setConversationId("resource_inf");
 				try {
-					inf.setContentObject(resource_agent.getMessage());
+					inf.setContentObject(emergency);
 				} catch (IOException e) { 
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
@@ -183,13 +204,13 @@ public class ResourceManager{
 				break;
 			case 1:
 				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("resource_inf"),
-						MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+						MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
 				
 				ACLMessage reply = myAgent.receive(mt);
 				if (reply != null) {
 
 					// Reply received
-					if (reply.getPerformative() == ACLMessage.INFORM) {
+					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						try {
 							resource_positions.add((EmergencyMessage) reply.getContentObject());
 						} catch (UnreadableException e) {
@@ -198,25 +219,59 @@ public class ResourceManager{
 						replies_cnt++;
 					}
 		
-					if (replies_cnt >= resource_agent.getResourceAgents().length) {
-						myAgent.addBehaviour(new RequestPerformer());
+					if (replies_cnt >= resource_agent.getResourceAgents().length-1) {
 						step = 2; 
-				}}
+				}
+					}
 				else {
 					block();
 				}
 				break;
+			case 2:
+				double time = calculateTime(resource_agent.getMessage(),emergency);
+				AID best_agent = myAgent.getAID();
+				for(int i=0; i<resource_positions.size();i++) {
+				
+					if(resource_positions.get(i).getTime_to_respond() < time) {
+						time=resource_positions.get(i).getTime_to_respond();
+						best_agent=resource_positions.get(i).getSenderID();
+					}
+				}
+				
+					if(best_agent.equals(myAgent.getAID())){
+						step=4;
+					}
+					else {
+						step=3;
+					}
+				
+				
+				break;
+				
+			case 3:
+				// Send the information to all resources
+				ACLMessage ref = new ACLMessage(ACLMessage.REFUSE);
+				for (int i = 0; i < resource_agent.getResourceAgents().length; ++i) {
+					if(!resource_agent.getResourceAgents()[i].equals(myAgent.getAID()))
+						ref.addReceiver(resource_agent.getResourceAgents()[i]);
+				} 
+
+				ref.setConversationId("resource_inf");
+				try {
+					ref.setContentObject(emergency);
+				} catch (IOException e) { 
+					e.printStackTrace();
+				}
+				
+				ref.setReplyWith("inf"+System.currentTimeMillis()); // Unique value
+				myAgent.send(ref);
+				
 			default:
 				break;
 			}
 		}
 		
 
-		@Override
-		public boolean done() {
-			// TODO Auto-generated method stub
-			return false;
-		}
 		
 		
 	}
