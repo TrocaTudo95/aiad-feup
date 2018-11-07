@@ -7,3 +7,10 @@
 /EmergencyManager.class
 /EmergencyManager$OfferRequestsServer.class
 /EmergencyManager$PurchaseOrdersServer.class
+/Pair.class
+/ResourceManager$EmergencyHandler.class
+/InformAmbulances.class
+/PurchaseOrdersServer.class
+/ResourceManager$EmergencyRequest.class
+/ResourceManager$RequestEmergency.class
+/EmergencyManager$RequestEmergencyServer.class

@@ -29,14 +29,14 @@ public class EmergencyMessage implements Serializable {
 		this.priority = priority;
 		this.x = x;
 		this.y = y;
-		this.senderID=id;
+		this.setSenderID(id);
 	}
 	
 	public EmergencyMessage() {
 		this.priority = 0;
 		this.x = 0;
 		this.y = 0;
-		this.senderID= null;
+		this.setSenderID(null);
 	}
 	
 	public int getPriority() {
@@ -61,6 +61,14 @@ public class EmergencyMessage implements Serializable {
 	
 	public void setY(int y) {
 		this.y = y;
+	}
+
+	public AID getSenderID() {
+		return senderID;
+	}
+
+	public void setSenderID(AID senderID) {
+		this.senderID = senderID;
 	}
 	
 	

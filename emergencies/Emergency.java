@@ -24,21 +24,15 @@ Boston, MA  02111-1307, USA.
 package emergencies;
 
 import jade.core.Agent;
-import jade.core.behaviours.*;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
 
 import behaviours.EmergencyManager;
-import behaviours.ResourceManager;
-import behaviours.ResourceManager.InformAmbulances;
+
 
 public class Emergency extends Agent {
 
@@ -90,7 +84,7 @@ public class Emergency extends Agent {
 			fe.printStackTrace();
 		}
 		
-		addBehaviour(manager.new OfferRequestsServer());
+		addBehaviour(manager.new RequestEmergencyServer());
 		addBehaviour(manager.new PurchaseOrdersServer());
 	}
 
