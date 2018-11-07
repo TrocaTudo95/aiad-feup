@@ -8,9 +8,12 @@
 /EmergencyManager$OfferRequestsServer.class
 /EmergencyManager$PurchaseOrdersServer.class
 /Pair.class
+<<<<<<< HEAD
 /ResourceManager$EmergencyHandler.class
 /InformAmbulances.class
 /PurchaseOrdersServer.class
 /ResourceManager$EmergencyRequest.class
 /ResourceManager$RequestEmergency.class
 /EmergencyManager$RequestEmergencyServer.class
+=======
+>>>>>>> 618ac010e097310524f382e8a73434c590a7a3c2
