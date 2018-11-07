@@ -1,0 +1,5 @@
+Ambulance(2,10,3)
+Emergency(3,4,1)
+Ambulance(2,13,3)
+Ambulance(4,9,3)
+Emergency(2,4,12)
