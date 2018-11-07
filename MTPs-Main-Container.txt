@@ -1,1 +1,1 @@
-http://pc:7778/acc
+http://daniel-toshiba:7778/acc
