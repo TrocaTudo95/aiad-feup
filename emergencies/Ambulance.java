@@ -1,7 +1,6 @@
 package emergencies;
 
 import behaviours.ResourceManager;
-import behaviours.ResourceManager.RequestResourceServer;
 import jade.core.Agent;
 import jade.core.AID;
 import jade.core.behaviours.*;
@@ -18,8 +17,6 @@ public class Ambulance extends Agent {
 	private int speed;
 	
 	private EmergencyMessage message;
-	private EmergencyMessage current_emergency;
-
 	private ResourceManager manager;
 	
 
@@ -79,21 +76,18 @@ public class Ambulance extends Agent {
 		sd.setType(type);
 		template.addServices(sd);
 		
-		System.out.println("Found the following " + type + " agents:");
 
 		try {
 			DFAgentDescription[] result = DFService.search(this, template); 
 			agents = new AID[result.length];
 			for (int i = 0; i < result.length; ++i) {
 				agents[i] = result[i].getName();
-				System.out.println(agents[i].getName());
 			}
 		}
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
 		
-		System.out.println();
 		
 		return agents;
 	}
@@ -149,15 +143,5 @@ public class Ambulance extends Agent {
 		return speed;
 	}
 	
-	public EmergencyMessage getCurrent_emergency() {
-		return current_emergency;
-	}
-
-
-	public void setCurrent_emergency(EmergencyMessage current_emergency) {
-		this.current_emergency = current_emergency;
-	}
-
-
 
 }

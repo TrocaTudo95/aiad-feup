@@ -65,10 +65,6 @@ public class Emergency extends Agent {
 		
 		message = new EmergencyMessage(priority,position_x,position_y,getAID());
 		manager = new EmergencyManager(this);
-				
-		// Create and show the GUI 
-		// myGui = new EmergencyGui(this);
-		// myGui.showGui();
 
 		// Register the emergency in the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -97,8 +93,7 @@ public class Emergency extends Agent {
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
-		// Printout a dismissal message
-		System.out.println("Emergency "+getAID().getName()+" atended.");
+		
 	}
 
 	public Serializable getMessage() {

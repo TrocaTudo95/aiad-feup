@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import behaviours.ResourceManager.RequestEmergency;
 import emergencies.Ambulance;
 import emergencies.EmergencyMessage;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
@@ -17,7 +19,11 @@ public class ResourceManager{
 	
 	Ambulance my_resource;
 	private Pair<Integer, Integer> hospital=new Pair(2,3);
-	EmergencyMessage  emergency = new EmergencyMessage();
+	
+	EmergencyMessage  pendent_emergency;
+	EmergencyMessage  current_emergency;
+	long start_time = 0;
+	long total_time = 0;
 	
 	public ResourceManager(Ambulance resource_agent) {
 		this.my_resource= resource_agent;
@@ -28,8 +34,8 @@ public class ResourceManager{
 		double distance_to_emergency = Math.sqrt(Math.pow(ambulance_msg.getX()-emergency.getX(), 2)+Math.pow(ambulance_msg.getY()-emergency.getY(), 2));
 		double distance_to_hospital = distanceHospital(emergency);
 		time = (distance_to_emergency + distance_to_hospital) * my_resource.getSpeed();
-			if(my_resource.getCurrent_emergency()!=null) {
-				time+=2;
+			if(current_emergency!=null) {
+				time += total_time - (start_time - System.currentTimeMillis())/1000;
 			}
 			Random rand = new Random();
 
@@ -81,12 +87,12 @@ public class ResourceManager{
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						
 						try {
-							emergency = (EmergencyMessage) reply.getContentObject();
+							pendent_emergency = (EmergencyMessage) reply.getContentObject();
 						} catch (UnreadableException e) {
 							e.printStackTrace();
 						}
 						
-						System.out.println("Emergency " + emergency.getSenderID().getName() + " being alocated by " + myAgent.getName() + ".\n");
+						System.out.println("Emergency " + pendent_emergency.getSenderID().getName() + " being alocated by " + myAgent.getName() + ".\n");
 						myAgent.addBehaviour(new InformAmbulances());
 						step =2;
 						
@@ -134,7 +140,7 @@ public class ResourceManager{
 				cfp.setConversationId("emergency_inf");
 				cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
 				try {
-					cfp.setContentObject(emergency);
+					cfp.setContentObject(pendent_emergency);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -169,16 +175,19 @@ public class ResourceManager{
 				break;
 			case 2:
 
-				double time = calculateTime(my_resource.getMessage(),emergency);
+				double time = calculateTime(my_resource.getMessage(),pendent_emergency);
+				
+				System.out.println(myAgent.getName() + "|" + pendent_emergency.getSenderID().getName() + " - "+ time);
 
 				for(int i=0; i<resources_msg.size();i++) {
+					System.out.println(resources_msg.get(i).getSender().getName() + "|" + pendent_emergency.getSenderID().getName() + " - "+ Double.parseDouble(resources_msg.get(i).getContent()) );
 					if(Double.parseDouble(resources_msg.get(i).getContent()) < time) {
 						time=Double.parseDouble(resources_msg.get(i).getContent());
 						best_agent=resources_msg.get(i).getSender();
 					}
 				}
 				
-				System.out.println("Resource " + best_agent.getName() + " will attend emergency " + emergency.getSenderID().getName());
+				System.out.println("\nResource " + best_agent.getName() + " will attend emergency " + pendent_emergency.getSenderID().getName());
 				
 					if(best_agent.equals(myAgent.getAID())){
 						step=3;
@@ -205,6 +214,7 @@ public class ResourceManager{
 				myAgent.send(ref);
 				
 				step=5;
+				current_emergency = pendent_emergency;
 				myAgent.addBehaviour(new EmergencyServer());
 				
 				break;
@@ -227,7 +237,7 @@ public class ResourceManager{
 				
 				
 				try {
-					accept.setContentObject(emergency);
+					accept.setContentObject(pendent_emergency);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -297,7 +307,7 @@ public class ResourceManager{
 					
 					if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
 						try {
-							emergency = (EmergencyMessage) msg.getContentObject();
+							current_emergency = (EmergencyMessage) msg.getContentObject();
 						} catch (UnreadableException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -328,8 +338,19 @@ public class ResourceManager{
 		public void action() {
 			ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 			
-			accept.addReceiver(emergency.getSenderID());
+			accept.addReceiver(current_emergency.getSenderID());
 			myAgent.send(accept);
+			
+			start_time = System.currentTimeMillis();
+			total_time = (long) calculateTime(my_resource.getMessage(),current_emergency);
+			
+			myAgent.addBehaviour(new TickerBehaviour(myAgent, total_time*1000) {
+				protected void onTick() {
+					System.out.println("Emergency " + current_emergency.getSenderID().getName() + " served.\n");
+					current_emergency = null;
+					myAgent.removeBehaviour(this);
+				}
+			});
 			
 			step =1;
 		}
