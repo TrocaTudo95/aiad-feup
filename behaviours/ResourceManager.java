@@ -15,20 +15,20 @@ import jade.lang.acl.UnreadableException;
 
 public class ResourceManager{
 	
-	Ambulance resource_agent;
+	Ambulance my_resource;
 
 	private Pair<Double, Double> hospital=new Pair(2,3);
 	private EmergencyMessage emergency;
 	public ResourceManager(Ambulance resource_agent) {
-		this.resource_agent= resource_agent;
+		this.my_resource= resource_agent;
 	}
 	
-	public double calculateTime(EmergencyMessage ambulance, EmergencyMessage emergency) {
+	public double calculateTime(EmergencyMessage ambulance_msg, EmergencyMessage emergency) {
 		double time=0;
-		double distance_to_emergency = Math.sqrt(Math.pow(ambulance.getX()-emergency.getX(), 2)+Math.pow(ambulance.getY()-emergency.getY(), 2));
+		double distance_to_emergency = Math.sqrt(Math.pow(ambulance_msg.getX()-emergency.getX(), 2)+Math.pow(ambulance_msg.getY()-emergency.getY(), 2));
 		double distance_to_hospital = distanceHospital(emergency);
-		time = (distance_to_emergency + distance_to_hospital) * resource_agent.getSpeed();
-			if(resource_agent.getCurrent_emergency()!=null) {
+		time = (distance_to_emergency + distance_to_hospital) * my_resource.getSpeed();
+			if(my_resource.getCurrent_emergency()!=null) {
 				time+=2;//TODO:tempo atual que falta para acabar a emergência
 			}
 			Random rand = new Random();
@@ -74,8 +74,8 @@ public class ResourceManager{
 			case 0:
 				
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-				if(resource_agent.getEmergencyAgents().length > i)
-					cfp.addReceiver(resource_agent.getEmergencyAgents()[i]);
+				if(my_resource.getEmergencyAgents().length > i)
+					cfp.addReceiver(my_resource.getEmergencyAgents()[i]);
 				else
 					step =2;
 
@@ -103,6 +103,7 @@ public class ResourceManager{
 						}
 						
 						System.out.println("Emergency " + emergency.getSenderID().getName() + "being alocated by " + myAgent.getName() + ".\n");
+						myAgent.addBehaviour(new InformAmbulances());
 						step =2;
 						
 					}else 
@@ -123,11 +124,8 @@ public class ResourceManager{
 
 	}
 		
-	public class InformAmbulances extends CyclicBehaviour{
+	public class InformAmbulances extends Behaviour{
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 		private MessageTemplate mt;
 		private int step = 0;
@@ -141,11 +139,13 @@ public class ResourceManager{
 			
 			switch (step) {
 			case 0:
-				// Send the information to all resources
+				
 				ACLMessage inf = new ACLMessage(ACLMessage.CFP);
-				for (int i = 0; i < resource_agent.getResourceAgents().length; ++i) {
-					if(!resource_agent.getResourceAgents()[i].equals(myAgent.getAID()))
-					inf.addReceiver(resource_agent.getResourceAgents()[i]);
+				AID[] resource_agents = my_resource.getResourceAgents();
+				
+				for (int i = 0; i < resource_agents.length; ++i) {
+					if(!resource_agents[i].equals(myAgent.getAID()))
+					inf.addReceiver(resource_agents[i]);
 				} 
 
 				inf.setConversationId("resource_inf");
@@ -177,7 +177,7 @@ public class ResourceManager{
 						replies_cnt++;
 					}
 		
-					if (replies_cnt >= resource_agent.getResourceAgents().length-1) {
+					if (replies_cnt >= my_resource.getResourceAgents().length-1) {
 
 						step = 2; 
 				}
@@ -187,7 +187,7 @@ public class ResourceManager{
 				}
 				break;
 			case 2:
-				double time = calculateTime(resource_agent.getMessage(),emergency);
+				double time = calculateTime(my_resource.getMessage(),emergency);
 				AID best_agent = myAgent.getAID();
 				for(int i=0; i<resource_positions.size();i++) {
 				
@@ -210,9 +210,9 @@ public class ResourceManager{
 			case 3:
 				// Send the information to all resources
 				ACLMessage ref = new ACLMessage(ACLMessage.REFUSE);
-				for (int i = 0; i < resource_agent.getResourceAgents().length; ++i) {
-					if(!resource_agent.getResourceAgents()[i].equals(myAgent.getAID()))
-						ref.addReceiver(resource_agent.getResourceAgents()[i]);
+				for (int i = 0; i < my_resource.getResourceAgents().length; ++i) {
+					if(!my_resource.getResourceAgents()[i].equals(myAgent.getAID()))
+						ref.addReceiver(my_resource.getResourceAgents()[i]);
 				} 
 
 				ref.setConversationId("resource_inf");
@@ -229,9 +229,55 @@ public class ResourceManager{
 				break;
 			}
 		}
+
+		@Override
+		public boolean done() {
+			// TODO Auto-generated method stub
+			return false;
+		}
 		
 
 		
+		
+	}
+	
+	public class RequestResourceServer extends CyclicBehaviour{
+		
+		private int step=0;
+
+		@Override
+		public void action() {
+			switch (step) {
+			case 0:
+				MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+				ACLMessage msg = myAgent.receive(mt);
+		
+				if (msg != null ) {
+					ACLMessage reply = msg.createReply();
+						
+					reply.setPerformative(ACLMessage.PROPOSE);
+					
+					try {
+						reply.setContentObject(my_resource.getMessage());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					myAgent.send(reply);
+					
+					step =1;
+				}
+				else {
+					block();
+				}
+				break;
+			case 1:
+				break;
+			}
+				
+			
+		}
 		
 	}
 

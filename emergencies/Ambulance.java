@@ -1,6 +1,7 @@
 package emergencies;
 
 import behaviours.ResourceManager;
+import behaviours.ResourceManager.RequestResourceServer;
 import jade.core.Agent;
 import jade.core.AID;
 import jade.core.behaviours.*;
@@ -59,7 +60,7 @@ public class Ambulance extends Agent {
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
-		sd.setType("ambulance");
+		sd.setType("resources");
 		sd.setName("PAM");
 		dfd.addServices(sd);
 		try {
@@ -68,6 +69,8 @@ public class Ambulance extends Agent {
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
+		
+		addBehaviour(manager.new RequestResourceServer());
 		
 		addBehaviour(new TickerBehaviour(this, 30000) {
 			protected void onTick() {
