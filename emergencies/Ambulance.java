@@ -17,23 +17,8 @@ public class Ambulance extends Agent {
 	private int position_y;
 	private int speed;
 	
-	public int getSpeed() {
-		return speed;
-	}
-
-
 	private EmergencyMessage message;
 	private EmergencyMessage current_emergency;
-	
-	
-	public EmergencyMessage getCurrent_emergency() {
-		return current_emergency;
-	}
-
-
-	public void setCurrent_emergency(EmergencyMessage current_emergency) {
-		this.current_emergency = current_emergency;
-	}
 
 	private ResourceManager manager;
 	
@@ -49,6 +34,8 @@ public class Ambulance extends Agent {
 			position_x=0;
 			position_y=0;
 		}
+		
+		speed=1;
 		
 		System.out.println("Ambulance " + getAID().getName() + " is ready.");
 		System.out.println("Coordinates: (" + position_x + "," + position_y + ")\n");
@@ -92,7 +79,7 @@ public class Ambulance extends Agent {
 		sd.setType(type);
 		template.addServices(sd);
 		
-		System.out.println("\nFound the following " + type + " agents:");
+		System.out.println("Found the following " + type + " agents:");
 
 		try {
 			DFAgentDescription[] result = DFService.search(this, template); 
@@ -158,9 +145,19 @@ public class Ambulance extends Agent {
 		return message;
 	}
 	
-	public boolean checkDistance() {
-		// TODO Auto-generated method stub
-		return true;
+	public int getSpeed() {
+		return speed;
 	}
+	
+	public EmergencyMessage getCurrent_emergency() {
+		return current_emergency;
+	}
+
+
+	public void setCurrent_emergency(EmergencyMessage current_emergency) {
+		this.current_emergency = current_emergency;
+	}
+
+
 
 }
