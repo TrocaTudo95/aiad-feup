@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 Ambulance(2,10,2)
 Emergency(3,9,5)
 Emergency(2,3,5)
 Emergency(1,4,2)
 Ambulance(2,13,4)
+=======
+Ambulance(2,10,3)
+Emergency(3,4,1)
+Ambulance(2,13,3)
+Ambulance(4,9,3)
+Emergency(2,4,12)
+>>>>>>> 2c29ff23a0e4014c120b1b92b0dfd3719172c94a

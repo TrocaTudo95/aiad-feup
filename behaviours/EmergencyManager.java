@@ -15,45 +15,36 @@ public class EmergencyManager {
 		this.emergency_agent= emergency_agent;
 	}
 	
-	public class OfferRequestsServer extends CyclicBehaviour {
+	public class RequestEmergencyServer extends CyclicBehaviour {
 		
-		private int step = 0;
 		public void action() {
-			switch(step) {
-			case 0:
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
 			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null && !being_solved) {
+			if (msg != null ) {
 				ACLMessage reply = msg.createReply();
 
-				reply.setPerformative(ACLMessage.PROPOSE);
-				
-				try {
-					reply.setContentObject(emergency_agent.getMessage());
-				} catch (IOException e) {
-					e.printStackTrace();
+				if(being_solved) {
+					reply.setPerformative(ACLMessage.REFUSE);
 				}
-			
+				else{
+					being_solved=true;
+					reply.setPerformative(ACLMessage.PROPOSE);
+					
+					try {
+						reply.setContentObject(emergency_agent.getMessage());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				
+				}
+				
 				myAgent.send(reply);
-				step=1;
 			}
 			else {
 				block();
 			}
-			break;
-			case 1:
-				MessageTemplate mt2 = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-				ACLMessage msg2 = myAgent.receive(mt2);
-				if (msg2 != null) {
-					being_solved=true;
-				}
-				else {
-					block();
-				}
-				break;
-				
-		}
-	} 
+			
+		} 
 	}// End of inner class OfferRequestsServer
 
 	public class PurchaseOrdersServer extends CyclicBehaviour {

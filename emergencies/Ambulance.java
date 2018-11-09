@@ -1,6 +1,7 @@
 package emergencies;
 
 import behaviours.ResourceManager;
+import behaviours.ResourceManager.RequestResourceServer;
 import jade.core.Agent;
 import jade.core.AID;
 import jade.core.behaviours.*;
@@ -20,10 +21,20 @@ public class Ambulance extends Agent {
 		return speed;
 	}
 
-	private AID[] emergency_agents;
-	private AID[] resource_agents;
-	
+
 	private EmergencyMessage message;
+	private EmergencyMessage current_emergency;
+	
+	
+	public EmergencyMessage getCurrent_emergency() {
+		return current_emergency;
+	}
+
+
+	public void setCurrent_emergency(EmergencyMessage current_emergency) {
+		this.current_emergency = current_emergency;
+	}
+
 	private ResourceManager manager;
 	
 
@@ -49,7 +60,7 @@ public class Ambulance extends Agent {
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
-		sd.setType("ambulance");
+		sd.setType("resources");
 		sd.setName("PAM");
 		dfd.addServices(sd);
 		try {
@@ -59,23 +70,21 @@ public class Ambulance extends Agent {
 			fe.printStackTrace();
 		}
 		
+		addBehaviour(manager.new RequestResourceServer());
 		
-		// Add a TickerBehaviour that schedules a request to emergency agents every minute
-		addBehaviour(new TickerBehaviour(this, 60000) {
+		addBehaviour(new TickerBehaviour(this, 30000) {
 			protected void onTick() {
 				
-				setResourceAgents(listAllAgents("ambulance"));
-				setEmergencyAgents(listAllAgents("emergency"));
-				
-				
-				myAgent.addBehaviour(manager.new InformAmbulances());
-				
+				addBehaviour(manager.new RequestEmergency());
+
 			}
 		});
+		
+		
 	}
 	
 	
-	private AID[] listAllAgents(String type) {
+	public AID[] listAllAgents(String type) {
 		AID[] agents = new AID[0];
 		
 		DFAgentDescription template = new DFAgentDescription();
@@ -119,24 +128,24 @@ public class Ambulance extends Agent {
 
 
 	public AID[] getEmergencyAgents() {
-		return emergency_agents;
-	}
+		AID[] agents = listAllAgents("emergency");
 
-
-	public void setEmergencyAgents(AID[] emergency_agents) {
-		this.emergency_agents = emergency_agents;
+		if(agents!= null)
+			return agents;
+		else 
+			return new AID[0];
 	}
 
 
 	public AID[] getResourceAgents() {
-		return resource_agents;
+		AID[] agents = listAllAgents("resources");
+
+		if(agents!= null)
+			return agents;
+		else 
+			return new AID[0];
 	}
 
-
-	public void setResourceAgents(AID[] resource_agents) {
-		this.resource_agents = resource_agents;
-	}
-	
 	public int getX() {
 		return position_x;
 	}
