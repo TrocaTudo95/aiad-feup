@@ -129,14 +129,14 @@ public class ResourceManager{
 		private static final long serialVersionUID = 1L;
 		private MessageTemplate mt;
 		private int step = 0;
-		private ArrayList <EmergencyMessage> resource_positions= new ArrayList<EmergencyMessage>();
+		private ArrayList <ACLMessage> resource_positions= new ArrayList<ACLMessage>();
 		
 	
 		private int replies_cnt =0;
 		
 		@Override
 		public void action() {
-			
+			AID best_agent = myAgent.getAID();
 			switch (step) {
 			case 0:
 				
@@ -155,7 +155,7 @@ public class ResourceManager{
 					e.printStackTrace();
 				}
 				
-				inf.setReplyWith("inf"+System.currentTimeMillis()); // Unique value
+				inf.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
 				myAgent.send(inf);
 				
 				step = 1;
@@ -169,11 +169,8 @@ public class ResourceManager{
 
 					// Reply received
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
-						try {
-							resource_positions.add((EmergencyMessage) reply.getContentObject());
-						} catch (UnreadableException e) {
-							e.printStackTrace();
-						}
+				
+							resource_positions.add(reply);
 						replies_cnt++;
 					}
 		
@@ -187,13 +184,15 @@ public class ResourceManager{
 				}
 				break;
 			case 2:
+
 				double time = calculateTime(my_resource.getMessage(),emergency);
-				AID best_agent = myAgent.getAID();
+	
+
 				for(int i=0; i<resource_positions.size();i++) {
 				
-					if(resource_positions.get(i).getTime_to_respond() < time) {
-						time=resource_positions.get(i).getTime_to_respond();
-						best_agent=resource_positions.get(i).getSenderID();
+					if(Integer.parseInt(resource_positions.get(i).getContent()) < time) {
+						time=Integer.parseInt(resource_positions.get(i).getContent());
+						best_agent=resource_positions.get(i).getSender();
 					}
 				}
 				
@@ -210,21 +209,45 @@ public class ResourceManager{
 			case 3:
 				// Send the information to all resources
 				ACLMessage ref = new ACLMessage(ACLMessage.REFUSE);
-				for (int i = 0; i < my_resource.getResourceAgents().length; ++i) {
-					if(!my_resource.getResourceAgents()[i].equals(myAgent.getAID()))
-						ref.addReceiver(my_resource.getResourceAgents()[i]);
+
+				for (int i = 0; i < resource_positions.size(); ++i) {
+					if(!resource_positions.get(i).getSender().equals(myAgent.getAID()))
+						ref.addReceiver(resource_positions.get(i).getSender());
 				} 
 
 				ref.setConversationId("resource_inf");
-				try {
-					ref.setContentObject(emergency);
-				} catch (IOException e) { 
-					e.printStackTrace();
-				}
 				
-				ref.setReplyWith("inf"+System.currentTimeMillis()); // Unique value
+				
+				ref.setReplyWith("ref"+System.currentTimeMillis()); // Unique value
 				myAgent.send(ref);
 				
+				break;
+			case 4:
+				
+				// Send the information to all resources
+				ACLMessage ref2 = new ACLMessage(ACLMessage.REFUSE);
+				ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+				for (int i = 0; i < resource_positions.size(); ++i) {
+					if(!resource_positions.get(i).getSender().equals(myAgent.getAID()) && !resource_positions.get(i).getSender().equals(best_agent))
+						ref2.addReceiver(resource_positions.get(i).getSender());
+					else if(resource_positions.get(i).getSender().equals(best_agent)) {
+						accept.addReceiver(resource_positions.get(i).getSender());
+					}
+				} 
+
+				ref2.setConversationId("resource_inf");
+				
+				
+				ref2.setReplyWith("ref"+System.currentTimeMillis()); // Unique value
+				myAgent.send(ref2);
+				accept.setConversationId("resource_inf");
+				
+				
+				accept.setReplyWith("acc"+System.currentTimeMillis()); // Unique value
+				myAgent.send(accept);
+				
+				
+				break;
 			default:
 				break;
 			}
