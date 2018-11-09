@@ -1,4 +1,4 @@
-package reader;
+package launcher;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,7 +17,7 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
-public class Reader{
+public class JadeLauncher{
 	
 	private static jade.core.Runtime runtime;
 	private static Profile profile;
