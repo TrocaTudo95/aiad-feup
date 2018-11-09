@@ -205,22 +205,16 @@ public class ResourceManager{
 				myAgent.send(ref);
 				
 				step=5;
-				// add emergencyserver behaviour here 
-				
+				myAgent.addBehaviour(new EmergencyServer());
 				
 				break;
-			case 4:
-				
-				System.out.println("fdsfds");
-				
+			case 4:				
 				// Send the information to all resources
 				ACLMessage ref2 = new ACLMessage(ACLMessage.REFUSE);
 				ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 				for (int i = 0; i < resources_msg.size(); ++i) {
 					if(!resources_msg.get(i).getSender().equals(myAgent.getAID()) && !resources_msg.get(i).getSender().equals(best_agent)) {
 						ref2.addReceiver(resources_msg.get(i).getSender());
-						System.out.println(best_agent);
-						System.out.println(resources_msg.get(i).getSender());
 					}
 					else if(resources_msg.get(i).getSender().equals(best_agent)) {
 						accept.addReceiver(resources_msg.get(i).getSender());
@@ -228,14 +222,17 @@ public class ResourceManager{
 				} 
 
 				ref2.setConversationId("emergency_inf");
-				
-				
-				ref2.setReplyWith("ref"+System.currentTimeMillis()); // Unique value
 				myAgent.send(ref2);
 				accept.setConversationId("emergency_inf");
 				
 				
-				accept.setReplyWith("acc"+System.currentTimeMillis()); // Unique value
+				try {
+					accept.setContentObject(emergency);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 				myAgent.send(accept);
 				
 				step=5;
@@ -293,10 +290,53 @@ public class ResourceManager{
 				}
 				break;
 			case 1:
+				mt = MessageTemplate.MatchConversationId("emergency_inf");
+				
+				msg = myAgent.receive(mt);
+				if (msg != null) {
+					
+					if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+						try {
+							emergency = (EmergencyMessage) msg.getContentObject();
+						} catch (UnreadableException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						step =2;
+						myAgent.addBehaviour(new EmergencyServer());
+		
+					}else
+						done();
+				}
+				else {
+					block();
+				}
 				break;
 			}
 				
 			
+		}
+		
+	}
+	
+	public class EmergencyServer extends Behaviour{
+		
+		int step =0;
+
+		@Override
+		public void action() {
+			ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+			
+			accept.addReceiver(emergency.getSenderID());
+			myAgent.send(accept);
+			
+			step =1;
+		}
+
+		@Override
+		public boolean done() {
+			return (step>0);
 		}
 		
 	}

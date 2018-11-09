@@ -53,14 +53,7 @@ public class EmergencyManager {
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
-				// ACCEPT_PROPOSAL Message received. Process it
-				String title = msg.getContent();
-				ACLMessage reply = msg.createReply();
-
-				reply.setPerformative(ACLMessage.INFORM);
-				served=true;
-
-				myAgent.send(reply);
+				
 				myAgent.doDelete();
 			}
 			else {
