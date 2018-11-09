@@ -41,9 +41,10 @@ public class Ambulance extends Agent {
 	protected void setup() {
 
 		Object[] args = getArguments();
-		if (args != null && args.length == 2) {
-			position_x = Integer.parseInt((String) args[0]);
-			position_y = Integer.parseInt((String) args[1]);
+		if (args != null && args.length == 3) {
+			speed = Integer.parseInt((String) args[0]);
+			position_x = Integer.parseInt((String) args[1]);
+			position_y = Integer.parseInt((String) args[2]);
 		}
 		else {
 			position_x=0;
