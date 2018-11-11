@@ -41,7 +41,7 @@ public class ResourceManager{
 
 			int  time_in_hospital = rand.nextInt(3) + 1;
 			time+= time_in_hospital;
-			
+			System.out.println("im ambulance "+my_resource.getLocalName() + " and i'll take "+ time);
 		
 		return time;
 	}
@@ -105,9 +105,6 @@ public class ResourceManager{
 						} catch (UnreadableException e) {
 							e.printStackTrace();
 						}
-						
-						//System.out.println("Emergency " + pendent_emergency.getSenderID().getName() + " being alocated by " + myAgent.getName() + ".\n");
-						//myAgent.addBehaviour(new InformAmbulances());
 						replies_cnt ++;
 						
 					}
@@ -288,7 +285,6 @@ public class ResourceManager{
 
 		@Override
 		public boolean done() {
-			// TODO Auto-generated method stub
 			return (step>4);
 		}
 		
@@ -316,7 +312,6 @@ public class ResourceManager{
 					try {
 						emergency_position = (EmergencyMessage) msg.getContentObject();
 					} catch (UnreadableException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 					
@@ -380,9 +375,10 @@ public class ResourceManager{
 			
 			myAgent.addBehaviour(new TickerBehaviour(myAgent, total_time*1000) {
 				protected void onTick() {
-					System.out.println("Emergency " + current_emergency.getSenderID().getName() + " served.\n");
+					System.out.println("Emergency " + current_emergency.getSenderID().getLocalName() + " served.\n");
 					current_emergency = null;
 					myAgent.removeBehaviour(this);
+					
 				}
 			});
 			

@@ -24,17 +24,17 @@ public class JadeLauncher{
 	private static ContainerController mainContainer;
 	
 	
-	public static void main(String [] args) throws FileNotFoundException{
+	public static void main(String [] args) throws FileNotFoundException, InterruptedException{
 			
 		createJade();
 		parseText();
 	}
 	
 	
-	public static void parseText() throws FileNotFoundException {
+	public static void parseText() throws FileNotFoundException, InterruptedException {
 		
 		int am = 1;
-		int em = 2;
+		int em = 1;
 		
 		File file = new File("data.txt");
         try {
@@ -55,8 +55,8 @@ public class JadeLauncher{
                 String agentName = info[0];
                 Object [] agentArguments = {info[1], info[2],info[3]}; 
                 
-                if(agentName == "Ambulance") {
-                	agentNick = "am" + am;
+                if(agentName.equals("Ambulance")) {
+                	agentNick = "amb" + am;
                 	am++;
                 }
                 else {
@@ -65,6 +65,7 @@ public class JadeLauncher{
                 }
                 
                 createAgent(agentNick,agentName, agentArguments);
+                Thread.sleep(3000);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -82,7 +83,6 @@ public class JadeLauncher{
 		profile.setParameter(Profile.CONTAINER_NAME, "TestContainer");
 		profile.setParameter(Profile.MAIN_HOST, "localhost");
 	    mainContainer = runtime.createMainContainer(profile);
-		
 	}
 	
 	public static void createAgent(String agentNick, String agentName, Object [] agentArguments) {
