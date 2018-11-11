@@ -42,9 +42,10 @@ public class JadeLauncher{
             while (scanner.hasNextLine()) {
                 
             	String line = scanner.nextLine();
-
+                System.out.println(line);
+                
                 String[] info = line.split("-");
-                           
+                                           
                 String agentNick;
                 String agentName = info[0];
                 Object [] agentArguments = {info[1], info[2],info[3]}; 
@@ -59,7 +60,7 @@ public class JadeLauncher{
                 }
                 
                 createAgent(agentNick,agentName, agentArguments);
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

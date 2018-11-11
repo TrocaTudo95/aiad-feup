@@ -1,6 +1,4 @@
-Emergency-10-9-5
-Emergency-2-3-5
-Emergency-10-3-5
-Ambulance-2-10-3
-Ambulance-9-10-9
-Ambulance-20-10-10
+Emergency-10-0-0
+Emergency-15-0-0
+Emergency-11-0-0
+Ambulance-30-10-20
