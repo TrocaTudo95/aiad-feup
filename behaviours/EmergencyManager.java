@@ -2,7 +2,7 @@ package behaviours;
 
 import java.io.IOException;
 
-import emergencies.Emergency;
+import agents.Emergency;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -71,19 +71,18 @@ public class EmergencyManager {
 	}
 
 	public class AcceptAmbulance extends CyclicBehaviour {
-		Boolean served=false;
+		private static final long serialVersionUID = 1L;
+		
 		public void action() {
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
-				
 				myAgent.doDelete();
-				
 			}
 			else {
 				block();
 			}
 		}
-	}  // End of inner class OfferRequestsServer
+	}  
 
 }

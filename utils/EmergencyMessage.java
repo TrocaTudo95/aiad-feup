@@ -1,4 +1,4 @@
-package emergencies;
+package utils;
 
 import java.io.Serializable;
 

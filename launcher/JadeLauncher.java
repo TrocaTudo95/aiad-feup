@@ -1,21 +1,14 @@
 package launcher;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Scanner;
 
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
-import jade.wrapper.StaleProxyException;
+
 
 public class JadeLauncher{
 	
@@ -42,7 +35,6 @@ public class JadeLauncher{
             while (scanner.hasNextLine()) {
                 
             	String line = scanner.nextLine();
-                System.out.println(line);
                 
                 String[] info = line.split("-");
                                            
@@ -50,7 +42,7 @@ public class JadeLauncher{
                 String agentName = info[0];
                 Object [] agentArguments = {info[1], info[2],info[3]}; 
                 
-                if(agentName.equals("Ambulance")) {
+                if(agentName.equals("Resource")) {
                 	agentNick = "amb" + am;
                 	am++;
                 }
@@ -83,7 +75,7 @@ public class JadeLauncher{
 	public static void createAgent(String agentNick, String agentName, Object [] agentArguments) {
 
         try {
-        	AgentController ac = mainContainer.createNewAgent(agentNick, "emergencies." + agentName, agentArguments);
+        	AgentController ac = mainContainer.createNewAgent(agentNick, "agents." + agentName, agentArguments);
             ac.start();
         } catch (jade.wrapper.StaleProxyException e) {
             System.err.println("Error launching agent...");

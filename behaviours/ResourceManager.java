@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import agents.Resource;
 import behaviours.ResourceManager.RequestEmergency;
-import emergencies.Ambulance;
-import emergencies.EmergencyMessage;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
@@ -14,18 +13,21 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+import utils.EmergencyMessage;
+import utils.Pair;
 
 public class ResourceManager{
 	
-	Ambulance my_resource;
-	private Pair<Integer, Integer> hospital=new Pair(10,10);
+	private Pair<Integer, Integer> hospital=new Pair<Integer, Integer>(10,10);
+	Resource my_resource;
 	
 	EmergencyMessage  pendent_emergency;
 	EmergencyMessage  current_emergency;
+	
 	long start_time = 0;
 	long total_time = 0;
 	
-	public ResourceManager(Ambulance resource_agent) {
+	public ResourceManager(Resource resource_agent) {
 		this.my_resource= resource_agent;
 	}
 	
@@ -41,7 +43,7 @@ public class ResourceManager{
 
 			int  time_in_hospital = rand.nextInt(3) + 1;
 			time+= time_in_hospital;
-			System.out.println("im ambulance "+my_resource.getLocalName() + " and i'll take "+ time + " and my speed is "+my_resource.getSpeed());
+			System.out.println("Resource "+ my_resource.getLocalName() + " to emergency: "+ emergency.getSenderID().getLocalName() + " time -> " + time + " s." );
 		
 		return time;
 	}
@@ -55,7 +57,7 @@ public class ResourceManager{
 	public class RequestEmergency extends Behaviour {
 		
 		private static final long serialVersionUID = 1L;
-		private MessageTemplate mt; 	// The template to receive replies
+		private MessageTemplate mt; 
 		private int replies_cnt =0;
 		private ArrayList <EmergencyMessage> emergency_positions= new ArrayList<EmergencyMessage>();
 		
@@ -76,7 +78,7 @@ public class ResourceManager{
 			case 0:
 				
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-				System.out.println("there are "+ my_resource.getEmergencyAgents().length +" active emergencies.\n");
+				System.out.println("There are "+ my_resource.getEmergencyAgents().length +" active emergencies.\n");
 				for(int i=0;i<my_resource.getEmergencyAgents().length;i++)
 					cfp.addReceiver(my_resource.getEmergencyAgents()[i]);
 
@@ -94,7 +96,7 @@ public class ResourceManager{
 				if (reply != null) {
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						try {
-							if(!Ambulance.being_treated.contains(emergency_positions.add((EmergencyMessage) reply.getContentObject())))
+							if(!Resource.being_treated.contains(emergency_positions.add((EmergencyMessage) reply.getContentObject())))
 							emergency_positions.add((EmergencyMessage) reply.getContentObject());
 						} catch (UnreadableException e) {
 							e.printStackTrace();
@@ -115,6 +117,7 @@ public class ResourceManager{
 				break;
 			case 2:
 				pendent_emergency=calculate_higher_priority();
+				System.out.println("Resource " + myAgent.getLocalName() + " will process emergency " + pendent_emergency.getSenderID().getLocalName() + ".");
 				
 				ACLMessage inform_yes = new ACLMessage(ACLMessage.INFORM);
 				inform_yes.setContent("yes");
@@ -132,8 +135,7 @@ public class ResourceManager{
 				myAgent.send(inform_no);
 				
 				
-				
-				Ambulance.being_treated.add(pendent_emergency);
+				Resource.being_treated.add(pendent_emergency);
 				myAgent.addBehaviour(new InformAmbulances());
 				emergency_positions= new ArrayList<EmergencyMessage>();
 				replies_cnt=0;
@@ -163,7 +165,6 @@ public class ResourceManager{
 		@Override
 		public void action() {
 			
-			System.out.println("im ambulance "+myAgent.getLocalName() + " and i'm serving the emergencie "+ pendent_emergency.getSenderID().getLocalName());
 			switch (step) {
 			case 0:
 				
@@ -180,11 +181,10 @@ public class ResourceManager{
 				} 
 
 				cfp.setConversationId("emergency_inf");
-				cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
+				cfp.setReplyWith("cfp"+System.currentTimeMillis()); 
 				try {
 					cfp.setContentObject(pendent_emergency);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
@@ -199,7 +199,6 @@ public class ResourceManager{
 				ACLMessage reply = myAgent.receive(mt);
 				if (reply != null) {
 
-					// Reply received
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 				
 						resources_msg.add(reply);
@@ -258,7 +257,6 @@ public class ResourceManager{
 				
 				break;
 			case 4:				
-				// Send the information to all resources
 				ACLMessage ref2 = new ACLMessage(ACLMessage.REFUSE);
 				ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 				for (int i = 0; i < resources_msg.size(); ++i) {
@@ -278,7 +276,6 @@ public class ResourceManager{
 				try {
 					accept.setContentObject(pendent_emergency);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
@@ -302,7 +299,8 @@ public class ResourceManager{
 	}
 	
 	public class AmbulanceRequestsServer extends CyclicBehaviour{
-		
+
+		private static final long serialVersionUID = 1L;
 		private int step=0;
 
 		@Override
@@ -314,7 +312,6 @@ public class ResourceManager{
 		
 				if (msg != null ) {
 					
-					System.out.println("CFP Received");
 					ACLMessage reply = msg.createReply();
 					
 					EmergencyMessage emergency_position = new EmergencyMessage();

@@ -1,33 +1,11 @@
-/*****************************************************************
-JADE - Java Agent DEvelopment Framework is a framework to develop 
-multi-agent systems in compliance with the FIPA specifications.
-Copyright (C) 2000 CSELT S.p.A. 
-
-GNU Lesser General Public License
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation, 
-version 2.1 of the License. 
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the
-Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-Boston, MA  02111-1307, USA.
- *****************************************************************/
-
-package emergencies;
+package agents;
 
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import utils.EmergencyMessage;
 
 import java.io.Serializable;
 
@@ -60,8 +38,8 @@ public class Emergency extends Agent {
 		}
 		
 		System.out.println("New Emergengy " + getAID().getName());
-		System.out.println("Priority: " + priority);
-		System.out.println("Coordinates: (" + position_x + "," + position_y + ")\n");
+		System.out.println("Coordinates: (" + position_x + "," + position_y + ")");
+		System.out.println("Priority: " + priority + "\n");
 		
 		message = new EmergencyMessage(priority,position_x,position_y,getAID());
 		manager = new EmergencyManager(this);
@@ -80,14 +58,12 @@ public class Emergency extends Agent {
 			fe.printStackTrace();
 		}
 		
+		// Add Emergency Behaviours
 		addBehaviour(manager.new RequestEmergencyServer());
 		addBehaviour(manager.new AcceptAmbulance());
 	}
 
-	// Put agent clean-up operations here
 	protected void takeDown() {
-		// Deregister from the yellow pages
-		System.out.println("IM DONE");
 		try {
 			DFService.deregister(this);
 		}

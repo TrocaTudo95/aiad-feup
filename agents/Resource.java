@@ -1,4 +1,4 @@
-package emergencies;
+package agents;
 
 import java.util.ArrayList;
 
@@ -10,8 +10,9 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import utils.EmergencyMessage;
 
-public class Ambulance extends Agent {
+public class Resource extends Agent {
 
 	private static final long serialVersionUID = 1L;
 	private int position_x;
@@ -35,13 +36,13 @@ public class Ambulance extends Agent {
 		else {
 			position_x=0;
 			position_y=0;
-			speed=5;
+			speed=1;
 		}
 		
 		
-		
 		System.out.println("Ambulance " + getAID().getName() + " is ready.");
-		System.out.println("Coordinates: (" + position_x + "," + position_y + ")\n");
+		System.out.println("Coordinates: (" + position_x + "," + position_y + ")");
+		System.out.println("Speed: " + speed + "\n");
 		
 		message = new EmergencyMessage(0,position_x,position_y,getAID());
 		manager = new ResourceManager(this);
@@ -60,13 +61,12 @@ public class Ambulance extends Agent {
 			fe.printStackTrace();
 		}
 		
+		// Add Resource Behaviours
 		addBehaviour(manager.new AmbulanceRequestsServer());
-		
 		addBehaviour(new TickerBehaviour(this, 30000) {
+			private static final long serialVersionUID = 1L;
 			protected void onTick() {
-				
 				addBehaviour(manager.new RequestEmergency());
-
 			}
 		});
 		
@@ -99,18 +99,15 @@ public class Ambulance extends Agent {
 	}
 	
 	
-	// Put agent clean-up operations here
 	protected void takeDown() {
-		// Deregister from the yellow pages
 		try {
 			DFService.deregister(this);
 		}
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
-		// Printout a dismissal message
-		System.out.println("Ambulance "+getAID().getName()+" terminating.");
-
+		
+		System.out.println("Ambulance " + getAID().getName() + " terminating.");
 	}
 
 
