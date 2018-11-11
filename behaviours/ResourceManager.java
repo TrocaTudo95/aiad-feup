@@ -18,7 +18,7 @@ import jade.lang.acl.UnreadableException;
 public class ResourceManager{
 	
 	Ambulance my_resource;
-	private Pair<Integer, Integer> hospital=new Pair(2,3);
+	private Pair<Integer, Integer> hospital=new Pair(10,10);
 	
 	EmergencyMessage  pendent_emergency;
 	EmergencyMessage  current_emergency;
@@ -35,13 +35,13 @@ public class ResourceManager{
 		double distance_to_hospital = distanceHospital(emergency);
 		time = (distance_to_emergency + distance_to_hospital) /my_resource.getSpeed();
 			if(current_emergency!=null) {
-				time += total_time - (start_time - System.currentTimeMillis())/1000;
+				time += (total_time - (start_time - System.currentTimeMillis())/1000);
 			}
 			Random rand = new Random();
 
 			int  time_in_hospital = rand.nextInt(3) + 1;
 			time+= time_in_hospital;
-			System.out.println("im ambulance "+my_resource.getLocalName() + " and i'll take "+ time);
+			System.out.println("im ambulance "+my_resource.getLocalName() + " and i'll take "+ time + " and my speed is "+my_resource.getSpeed());
 		
 		return time;
 	}
@@ -301,7 +301,7 @@ public class ResourceManager{
 		
 	}
 	
-	public class RequestResourceServer extends CyclicBehaviour{
+	public class AmbulanceRequestsServer extends CyclicBehaviour{
 		
 		private int step=0;
 
@@ -380,6 +380,7 @@ public class ResourceManager{
 			
 			accept.addReceiver(current_emergency.getSenderID());
 			myAgent.send(accept);
+			my_resource.updateAmbulancePosition(hospital.getX(), hospital.getY());
 			
 			start_time = System.currentTimeMillis();
 			total_time = (long) calculateTime(my_resource.getMessage(),current_emergency);

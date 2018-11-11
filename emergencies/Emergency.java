@@ -87,6 +87,7 @@ public class Emergency extends Agent {
 	// Put agent clean-up operations here
 	protected void takeDown() {
 		// Deregister from the yellow pages
+		System.out.println("IM DONE");
 		try {
 			DFService.deregister(this);
 		}

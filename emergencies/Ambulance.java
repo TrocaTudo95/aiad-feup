@@ -35,9 +35,10 @@ public class Ambulance extends Agent {
 		else {
 			position_x=0;
 			position_y=0;
+			speed=5;
 		}
 		
-		speed=1;
+		
 		
 		System.out.println("Ambulance " + getAID().getName() + " is ready.");
 		System.out.println("Coordinates: (" + position_x + "," + position_y + ")\n");
@@ -59,7 +60,7 @@ public class Ambulance extends Agent {
 			fe.printStackTrace();
 		}
 		
-		addBehaviour(manager.new RequestResourceServer());
+		addBehaviour(manager.new AmbulanceRequestsServer());
 		
 		addBehaviour(new TickerBehaviour(this, 30000) {
 			protected void onTick() {
@@ -148,5 +149,11 @@ public class Ambulance extends Agent {
 		return speed;
 	}
 	
+	public void updateAmbulancePosition(int x, int y) {
+		this.position_x=x;
+		this.position_y=y;
+		message.setX(x);
+		message.setY(y);
+	}
 
 }
