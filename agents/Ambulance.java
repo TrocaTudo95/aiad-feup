@@ -12,7 +12,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import utils.EmergencyMessage;
 
-public class Resource extends Agent {
+public class Ambulance extends Agent {
 
 	private static final long serialVersionUID = 1L;
 	private int position_x;

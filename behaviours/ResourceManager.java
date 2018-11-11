@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import agents.Resource;
+import agents.Ambulance;
 import behaviours.ResourceManager.RequestEmergency;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
@@ -19,7 +19,7 @@ import utils.Pair;
 public class ResourceManager{
 	
 	private Pair<Integer, Integer> hospital=new Pair<Integer, Integer>(10,10);
-	Resource my_resource;
+	Ambulance my_resource;
 	
 	EmergencyMessage  pendent_emergency;
 	EmergencyMessage  current_emergency;
@@ -27,7 +27,7 @@ public class ResourceManager{
 	long start_time = 0;
 	long total_time = 0;
 	
-	public ResourceManager(Resource resource_agent) {
+	public ResourceManager(Ambulance resource_agent) {
 		this.my_resource= resource_agent;
 	}
 	
@@ -96,7 +96,7 @@ public class ResourceManager{
 				if (reply != null) {
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						try {
-							if(!Resource.being_treated.contains(emergency_positions.add((EmergencyMessage) reply.getContentObject())))
+							if(!Ambulance.being_treated.contains(emergency_positions.add((EmergencyMessage) reply.getContentObject())))
 							emergency_positions.add((EmergencyMessage) reply.getContentObject());
 						} catch (UnreadableException e) {
 							e.printStackTrace();
@@ -135,7 +135,7 @@ public class ResourceManager{
 				myAgent.send(inform_no);
 				
 				
-				Resource.being_treated.add(pendent_emergency);
+				Ambulance.being_treated.add(pendent_emergency);
 				myAgent.addBehaviour(new InformAmbulances());
 				emergency_positions= new ArrayList<EmergencyMessage>();
 				replies_cnt=0;

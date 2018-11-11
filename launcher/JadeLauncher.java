@@ -42,7 +42,7 @@ public class JadeLauncher{
                 String agentName = info[0];
                 Object [] agentArguments = {info[1], info[2],info[3]}; 
                 
-                if(agentName.equals("Resource")) {
+                if(agentName.equals("Ambulance")) {
                 	agentNick = "amb" + am;
                 	am++;
                 }
