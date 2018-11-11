@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path=""/>
-	<classpathentry kind="lib" path="/home/daniel/Transferências/JADE-bin-4.5.0/jade/lib/jade.jar"/>
-	<classpathentry kind="lib" path="/home/daniel/Transferências/commons-codec-1.11-bin/commons-codec-1.11/commons-codec-1.11.jar"/>
+	<classpathentry kind="lib" path="/home/sofia/Downloads/JADE-bin-4.5.0/jade/lib/jade.jar"/>
+	<classpathentry kind="lib" path="/home/sofia/Downloads/commons-codec-1.11-bin/commons-codec-1.11/commons-codec-1.11.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>

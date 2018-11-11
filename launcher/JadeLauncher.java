@@ -42,15 +42,9 @@ public class JadeLauncher{
             while (scanner.hasNextLine()) {
                 
             	String line = scanner.nextLine();
-                System.out.println(line);
-                
+
                 String[] info = line.split("-");
-                
-                System.out.println(info[0]);
-                System.out.println(info[1]);
-                System.out.println(info[2]);
-                System.out.println(info[3]);
-                                           
+                           
                 String agentNick;
                 String agentName = info[0];
                 Object [] agentArguments = {info[1], info[2],info[3]}; 

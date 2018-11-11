@@ -60,7 +60,6 @@ public class ResourceManager{
 		private ArrayList <EmergencyMessage> emergency_positions= new ArrayList<EmergencyMessage>();
 		
 		private int step = 0;
-		//private int i = 0;
 		
 		
 		public EmergencyMessage calculate_higher_priority() {
@@ -74,15 +73,12 @@ public class ResourceManager{
 
 		public void action() {
 			switch (step) {
-			// SEND CFP TO Ith EMERGENCY
 			case 0:
 				
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-				System.out.println("there are "+ my_resource.getEmergencyAgents().length +" to solve");
+				System.out.println("there are "+ my_resource.getEmergencyAgents().length +" active emergencies.\n");
 				for(int i=0;i<my_resource.getEmergencyAgents().length;i++)
 					cfp.addReceiver(my_resource.getEmergencyAgents()[i]);
-//				else
-//					step =2;
 
 				cfp.setConversationId("emergency");
 				cfp.setReplyWith("cfp"+System.currentTimeMillis());
@@ -92,14 +88,12 @@ public class ResourceManager{
 						MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
 				step = 1;
 				break;
-			// WAIT FOR EMERGENCY PROPOSAL OR REFUSE
+				
 			case 1:
 				ACLMessage reply = myAgent.receive(mt);
 				if (reply != null) {
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
-						
 						try {
-							//pendent_emergency = (EmergencyMessage) reply.getContentObject();
 							if(!Ambulance.being_treated.contains(emergency_positions.add((EmergencyMessage) reply.getContentObject())))
 							emergency_positions.add((EmergencyMessage) reply.getContentObject());
 						} catch (UnreadableException e) {
@@ -112,29 +106,46 @@ public class ResourceManager{
 						replies_cnt ++;
 					
 					if (replies_cnt >= my_resource.getEmergencyAgents().length && emergency_positions.size()>0) {
-						
-						pendent_emergency=calculate_higher_priority();
-						ACLMessage inform_emer = new ACLMessage(ACLMessage.INFORM);
-						inform_emer.addReceiver(pendent_emergency.getSenderID());
-						myAgent.send(inform_emer);
-						Ambulance.being_treated.add(pendent_emergency);
-						myAgent.addBehaviour(new InformAmbulances());
-						emergency_positions= new ArrayList<EmergencyMessage>();
-						replies_cnt=0;
-						step = 2; 
-}
+						step=2;	
+					}
 				}
-				
 				else {
 					block();
 				}
 				break;
+			case 2:
+				pendent_emergency=calculate_higher_priority();
+				
+				ACLMessage inform_yes = new ACLMessage(ACLMessage.INFORM);
+				inform_yes.setContent("yes");
+				inform_yes.addReceiver(pendent_emergency.getSenderID());
+				myAgent.send(inform_yes);
+				
+				ACLMessage inform_no = new ACLMessage(ACLMessage.INFORM);
+				inform_no.setContent("no");
+				
+				for(int i=0;i<my_resource.getEmergencyAgents().length;i++) {
+					if(!my_resource.getEmergencyAgents()[i].equals(pendent_emergency.getSenderID()))
+					inform_no.addReceiver(my_resource.getEmergencyAgents()[i]);
+				}
+				
+				myAgent.send(inform_no);
+				
+				
+				
+				Ambulance.being_treated.add(pendent_emergency);
+				myAgent.addBehaviour(new InformAmbulances());
+				emergency_positions= new ArrayList<EmergencyMessage>();
+				replies_cnt=0;
+				
+				step = 3; 
+				
 			}
 		}
 
 		@Override
 		public boolean done() {
-			return(step>1);
+			return(step>2);
 		}
 
 	}
@@ -208,10 +219,7 @@ public class ResourceManager{
 
 				double time = calculateTime(my_resource.getMessage(),pendent_emergency);
 				
-				System.out.println(myAgent.getName() + "|" + pendent_emergency.getSenderID().getName() + " - "+ time);
-
 				for(int i=0; i<resources_msg.size();i++) {
-					System.out.println(resources_msg.get(i).getSender().getName() + "|" + pendent_emergency.getSenderID().getName() + " - "+ Double.parseDouble(resources_msg.get(i).getContent()) );
 					if(Double.parseDouble(resources_msg.get(i).getContent()) < time) {
 						time=Double.parseDouble(resources_msg.get(i).getContent());
 						best_agent=resources_msg.get(i).getSender();
@@ -305,6 +313,8 @@ public class ResourceManager{
 				ACLMessage msg = myAgent.receive(mt);
 		
 				if (msg != null ) {
+					
+					System.out.println("CFP Received");
 					ACLMessage reply = msg.createReply();
 					
 					EmergencyMessage emergency_position = new EmergencyMessage();
@@ -342,11 +352,12 @@ public class ResourceManager{
 							e.printStackTrace();
 						}
 						
-						step =2;
+						
 						myAgent.addBehaviour(new EmergencyServer());
+						step=0;
 		
 					}else
-						done();
+						step=0;
 				}
 				else {
 					block();

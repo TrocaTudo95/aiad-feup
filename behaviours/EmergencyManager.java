@@ -31,7 +31,7 @@ public class EmergencyManager {
 					reply.setPerformative(ACLMessage.REFUSE);
 				}
 				else{
-					//being_solved=true;
+					being_solved=true;
 					reply.setPerformative(ACLMessage.PROPOSE);
 					
 					try {
@@ -53,8 +53,13 @@ public class EmergencyManager {
 				MessageTemplate inf = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 				ACLMessage msg_inf = myAgent.receive(inf);
 				if (msg_inf != null ) {
-					being_solved=true;
-					System.out.println("im "+ myAgent.getLocalName() +" and im being solved");
+					
+					String answer = msg_inf.getContent();
+					
+					if(answer.equals("no")) {
+						being_solved=false;
+					}
+					
 					step=0;
 				}
 				else {
