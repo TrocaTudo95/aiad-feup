@@ -10,6 +10,18 @@ public class EmergencyMessage implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + priority;
+		result = prime * result + ((senderID == null) ? 0 : senderID.hashCode());
+		result = prime * result + x;
+		result = prime * result + y;
+		return result;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -19,12 +31,20 @@ public class EmergencyMessage implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		EmergencyMessage other = (EmergencyMessage) obj;
+		if (priority != other.priority)
+			return false;
+		if (senderID == null) {
+			if (other.senderID != null)
+				return false;
+		} else if (!senderID.equals(other.senderID))
+			return false;
 		if (x != other.x)
 			return false;
 		if (y != other.y)
 			return false;
 		return true;
 	}
+
 	private int priority;
 	private int x;
 	private int y;

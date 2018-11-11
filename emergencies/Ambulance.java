@@ -1,5 +1,7 @@
 package emergencies;
 
+import java.util.ArrayList;
+
 import behaviours.ResourceManager;
 import jade.core.Agent;
 import jade.core.AID;
@@ -18,6 +20,8 @@ public class Ambulance extends Agent {
 	
 	private EmergencyMessage message;
 	private ResourceManager manager;
+	
+	public static ArrayList <EmergencyMessage> being_treated = new ArrayList<EmergencyMessage>();
 	
 
 	protected void setup() {

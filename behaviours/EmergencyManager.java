@@ -17,7 +17,11 @@ public class EmergencyManager {
 	
 	public class RequestEmergencyServer extends CyclicBehaviour {
 		
+		private static final long serialVersionUID = 1L;
+		private int step=0;
 		public void action() {
+			switch(step) {
+			case 0:
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null ) {
@@ -27,7 +31,7 @@ public class EmergencyManager {
 					reply.setPerformative(ACLMessage.REFUSE);
 				}
 				else{
-					being_solved=true;
+					//being_solved=true;
 					reply.setPerformative(ACLMessage.PROPOSE);
 					
 					try {
@@ -39,15 +43,29 @@ public class EmergencyManager {
 				}
 				
 				myAgent.send(reply);
+				step=1;
 			}
 			else {
 				block();
 			}
-			
+			break;
+			case 1:
+				MessageTemplate inf = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+				ACLMessage msg_inf = myAgent.receive(inf);
+				if (msg_inf != null ) {
+					being_solved=true;
+					System.out.println("im "+ myAgent.getLocalName() +" and im being solved");
+					step=0;
+				}
+				else {
+					step=0;
+				}
+				
 		} 
-	}// End of inner class OfferRequestsServer
+	}
+	}
 
-	public class PurchaseOrdersServer extends CyclicBehaviour {
+	public class AcceptAmbulance extends CyclicBehaviour {
 		Boolean served=false;
 		public void action() {
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -55,6 +73,7 @@ public class EmergencyManager {
 			if (msg != null) {
 				
 				myAgent.doDelete();
+				
 			}
 			else {
 				block();

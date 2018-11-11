@@ -33,7 +33,7 @@ public class ResourceManager{
 		double time=0;
 		double distance_to_emergency = Math.sqrt(Math.pow(ambulance_msg.getX()-emergency.getX(), 2)+Math.pow(ambulance_msg.getY()-emergency.getY(), 2));
 		double distance_to_hospital = distanceHospital(emergency);
-		time = (distance_to_emergency + distance_to_hospital) * my_resource.getSpeed();
+		time = (distance_to_emergency + distance_to_hospital) /my_resource.getSpeed();
 			if(current_emergency!=null) {
 				time += total_time - (start_time - System.currentTimeMillis())/1000;
 			}
@@ -56,9 +56,21 @@ public class ResourceManager{
 		
 		private static final long serialVersionUID = 1L;
 		private MessageTemplate mt; 	// The template to receive replies
+		private int replies_cnt =0;
+		private ArrayList <EmergencyMessage> emergency_positions= new ArrayList<EmergencyMessage>();
 		
 		private int step = 0;
-		private int i = 0;
+		//private int i = 0;
+		
+		
+		public EmergencyMessage calculate_higher_priority() {
+			EmergencyMessage max=emergency_positions.get(0);
+			for(int i=1;i<emergency_positions.size();i++) {
+				if(emergency_positions.get(i).getPriority()>max.getPriority())
+					max=emergency_positions.get(i);
+		}
+			return max;
+		}
 
 		public void action() {
 			switch (step) {
@@ -66,10 +78,11 @@ public class ResourceManager{
 			case 0:
 				
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-				if(my_resource.getEmergencyAgents().length > i)
+				System.out.println("there are "+ my_resource.getEmergencyAgents().length +" to solve");
+				for(int i=0;i<my_resource.getEmergencyAgents().length;i++)
 					cfp.addReceiver(my_resource.getEmergencyAgents()[i]);
-				else
-					step =2;
+//				else
+//					step =2;
 
 				cfp.setConversationId("emergency");
 				cfp.setReplyWith("cfp"+System.currentTimeMillis());
@@ -77,7 +90,6 @@ public class ResourceManager{
 
 				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("emergency"),
 						MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
-				i++;
 				step = 1;
 				break;
 			// WAIT FOR EMERGENCY PROPOSAL OR REFUSE
@@ -87,20 +99,36 @@ public class ResourceManager{
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						
 						try {
-							pendent_emergency = (EmergencyMessage) reply.getContentObject();
+							//pendent_emergency = (EmergencyMessage) reply.getContentObject();
+							if(!Ambulance.being_treated.contains(emergency_positions.add((EmergencyMessage) reply.getContentObject())))
+							emergency_positions.add((EmergencyMessage) reply.getContentObject());
 						} catch (UnreadableException e) {
 							e.printStackTrace();
 						}
 						
-						System.out.println("Emergency " + pendent_emergency.getSenderID().getName() + " being alocated by " + myAgent.getName() + ".\n");
-						myAgent.addBehaviour(new InformAmbulances());
-						step =2;
+						//System.out.println("Emergency " + pendent_emergency.getSenderID().getName() + " being alocated by " + myAgent.getName() + ".\n");
+						//myAgent.addBehaviour(new InformAmbulances());
+						replies_cnt ++;
 						
-					}else 
-						step =0;
+					}
+					else if(reply.getPerformative() == ACLMessage.REFUSE)
+						replies_cnt ++;
 					
-					
-				}else {
+					if (replies_cnt >= my_resource.getEmergencyAgents().length && emergency_positions.size()>0) {
+						
+						pendent_emergency=calculate_higher_priority();
+						ACLMessage inform_emer = new ACLMessage(ACLMessage.INFORM);
+						inform_emer.addReceiver(pendent_emergency.getSenderID());
+						myAgent.send(inform_emer);
+						Ambulance.being_treated.add(pendent_emergency);
+						myAgent.addBehaviour(new InformAmbulances());
+						emergency_positions= new ArrayList<EmergencyMessage>();
+						replies_cnt=0;
+						step = 2; 
+}
+				}
+				
+				else {
 					block();
 				}
 				break;
@@ -126,12 +154,18 @@ public class ResourceManager{
 		
 		@Override
 		public void action() {
+			
+			System.out.println("im ambulance "+myAgent.getLocalName() + " and i'm serving the emergencie "+ pendent_emergency.getSenderID().getLocalName());
 			switch (step) {
 			case 0:
 				
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 				AID[] resource_agents = my_resource.getResourceAgents();
 				
+					if(resource_agents.length==1) {
+						step=3;
+						break;
+					}
 				for (int i = 0; i < resource_agents.length; ++i) {
 					if(!resource_agents[i].equals(myAgent.getAID()))
 					cfp.addReceiver(resource_agents[i]);

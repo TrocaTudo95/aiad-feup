@@ -81,7 +81,7 @@ public class Emergency extends Agent {
 		}
 		
 		addBehaviour(manager.new RequestEmergencyServer());
-		addBehaviour(manager.new PurchaseOrdersServer());
+		addBehaviour(manager.new AcceptAmbulance());
 	}
 
 	// Put agent clean-up operations here
