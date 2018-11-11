@@ -21,7 +21,7 @@ public class ResourceManager{
 	private Pair<Integer, Integer> hospital=new Pair(10,10);
 	
 	EmergencyMessage  pendent_emergency;
-	EmergencyMessage  current_emergency=null;
+	EmergencyMessage  current_emergency;
 	long start_time = 0;
 	long total_time = 0;
 	
@@ -34,8 +34,7 @@ public class ResourceManager{
 		double distance_to_emergency = Math.sqrt(Math.pow(ambulance_msg.getX()-emergency.getX(), 2)+Math.pow(ambulance_msg.getY()-emergency.getY(), 2));
 		double distance_to_hospital = distanceHospital(emergency);
 		time = (distance_to_emergency + distance_to_hospital) /my_resource.getSpeed();
-			if(!current_emergency.equals(null)) {
-				System.out.println("MEEERDDAAAA"+ current_emergency.getSenderID().getLocalName());
+			if(current_emergency!=null) {
 				time += (total_time - (start_time - System.currentTimeMillis())/1000);
 			}
 			Random rand = new Random();
