@@ -12,7 +12,7 @@ Cada chamada efetuada para o CODU (centro de orientação de doentes urgentes) r
 
 ### 2. Definição do problema de análise de dados preditiva a resolver, enquadrado no âmbito do problema anterior.
 
-Nesta segunda fase do projeto iremos utilizar o software RapidMiner. Através desta plataforma é possível realizar estudos de *machine learning, deep learning, text mining, e análise preditiva.* Será neste último ponto que focaremos a nossa atenção. Pretende-se obter um modelo que analise os dados recolhidos pelo nosso programa e consiga responder à seguinte questão: **Como varia o tempo de resposta a uma situação de emergência? **
+Nesta segunda fase do projeto iremos utilizar o software RapidMiner. Através desta plataforma é possível realizar estudos de *machine learning, deep learning, text mining, e análise preditiva.* Será neste último ponto que focaremos a nossa atenção. Pretende-se obter um modelo que analise os dados recolhidos pelo nosso programa e consiga responder à seguinte questão: **Como varia o tempo de resposta a uma situação de emergência?**
 
 Esta questão pretende auxiliar na tomada de decisão relativamente à aquisição de novos recursos (ambulâncias).
 
