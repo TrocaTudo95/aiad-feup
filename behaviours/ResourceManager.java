@@ -18,14 +18,15 @@ import utils.Pair;
 
 public class ResourceManager{
 	
-	private Pair<Integer, Integer> hospital=new Pair<Integer, Integer>(10,10);
+	private Pair<Integer, Integer> hospital=new Pair<Integer, Integer>(2,2);
 	Ambulance my_resource;
 	
 	EmergencyMessage  pendent_emergency;
 	EmergencyMessage  current_emergency;
+	EmergencyMessage  active_emergency = null;
 	
 	long start_time = 0;
-	long total_time = 0;
+	double total_time = 0;
 	
 	public ResourceManager(Ambulance resource_agent) {
 		this.my_resource= resource_agent;
@@ -36,15 +37,14 @@ public class ResourceManager{
 		double distance_to_emergency = Math.sqrt(Math.pow(ambulance_msg.getX()-emergency.getX(), 2)+Math.pow(ambulance_msg.getY()-emergency.getY(), 2));
 		double distance_to_hospital = distanceHospital(emergency);
 		time = (distance_to_emergency + distance_to_hospital) /my_resource.getSpeed();
-			if(current_emergency!=null) {
+		
+			if(active_emergency!=null) {
 				time += (total_time - (start_time - System.currentTimeMillis())/1000);
 			}
-			Random rand = new Random();
 
-			int  time_in_hospital = rand.nextInt(3) + 1;
-			time+= time_in_hospital;
 			System.out.println("Resource "+ my_resource.getLocalName() + " to emergency: "+ emergency.getSenderID().getLocalName() + " time -> " + time + " s." );
 		
+			
 		return time;
 	}
 	
@@ -380,12 +380,15 @@ public class ResourceManager{
 			my_resource.updateAmbulancePosition(hospital.getX(), hospital.getY());
 			
 			start_time = System.currentTimeMillis();
-			total_time = (long) calculateTime(my_resource.getMessage(),current_emergency);
+			total_time = calculateTime(my_resource.getMessage(),current_emergency);
 			
-			myAgent.addBehaviour(new TickerBehaviour(myAgent, total_time*1000) {
+			active_emergency = current_emergency;
+			
+			myAgent.addBehaviour(new TickerBehaviour(myAgent, (long) (total_time*1000)) {
 				protected void onTick() {
 					System.out.println("Emergency " + current_emergency.getSenderID().getLocalName() + " served.\n");
-					current_emergency = null;
+					active_emergency = null;
+					my_resource.updateAmbulancePosition(hospital.getX(),hospital.getY());
 					myAgent.removeBehaviour(this);
 					
 				}
