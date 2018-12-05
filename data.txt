@@ -1,4 +1,4 @@
-Emergency-10-0-0
-Emergency-15-0-0
-Emergency-11-0-0
-Ambulance-30-10-20
+Emergency-10-1-1
+Emergency-15-1-1
+Emergency-11-3-3
+Ambulance-1-0-0
