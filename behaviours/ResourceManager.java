@@ -13,6 +13,7 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+import launcher.JadeLauncher;
 import utils.EmergencyMessage;
 import utils.Pair;
 
@@ -228,6 +229,7 @@ public class ResourceManager{
 				System.out.println("\nResource " + best_agent.getName() + " will attend emergency " + pendent_emergency.getSenderID().getName());
 				
 					if(best_agent.equals(myAgent.getAID())){
+						JadeLauncher.times.add(time);
 						step=3;
 					}
 					else {
@@ -323,7 +325,6 @@ public class ResourceManager{
 					}
 					
 					double time = calculateTime(my_resource.getMessage(),emergency_position);
-						
 					reply.setPerformative(ACLMessage.PROPOSE);
 					reply.setContent(Double.toString(time));
 					
@@ -345,10 +346,10 @@ public class ResourceManager{
 						try {
 							current_emergency = (EmergencyMessage) msg.getContentObject();
 						} catch (UnreadableException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						
+						double time = calculateTime(my_resource.getMessage(),current_emergency);
+						JadeLauncher.times.add(time);
 						
 						myAgent.addBehaviour(new EmergencyServer());
 						step=0;
@@ -379,8 +380,10 @@ public class ResourceManager{
 			myAgent.send(accept);
 			my_resource.updateAmbulancePosition(hospital.getX(), hospital.getY());
 			
+			
 			start_time = System.currentTimeMillis();
 			total_time = (long) calculateTime(my_resource.getMessage(),current_emergency);
+			JadeLauncher.out2.append(my_resource.getSpeed()+","+current_emergency.getPriority()+","+calculateTime(my_resource.getMessage(),current_emergency)+"\n");
 			
 			myAgent.addBehaviour(new TickerBehaviour(myAgent, total_time*1000) {
 				protected void onTick() {

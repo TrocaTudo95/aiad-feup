@@ -63,7 +63,7 @@ public class Ambulance extends Agent {
 		
 		// Add Resource Behaviours
 		addBehaviour(manager.new AmbulanceRequestsServer());
-		addBehaviour(new TickerBehaviour(this, 30000) {
+		addBehaviour(new TickerBehaviour(this, 20000) {
 			private static final long serialVersionUID = 1L;
 			protected void onTick() {
 				addBehaviour(manager.new RequestEmergency());
