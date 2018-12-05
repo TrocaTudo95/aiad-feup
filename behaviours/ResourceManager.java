@@ -383,7 +383,8 @@ public class ResourceManager{
 			
 			start_time = System.currentTimeMillis();
 			total_time = (long) calculateTime(my_resource.getMessage(),current_emergency);
-			JadeLauncher.out2.append(my_resource.getSpeed()+","+current_emergency.getPriority()+","+calculateTime(my_resource.getMessage(),current_emergency)+"\n");
+			 double distance= Math.sqrt(Math.pow(my_resource.getX()-current_emergency.getX(), 2)+Math.pow(my_resource.getY()-current_emergency.getY(), 2));
+			JadeLauncher.out2.append(my_resource.getSpeed()+","+distance+","+current_emergency.getPriority()+","+calculateTime(my_resource.getMessage(),current_emergency)+"\n");
 			
 			myAgent.addBehaviour(new TickerBehaviour(myAgent, total_time*1000) {
 				protected void onTick() {
