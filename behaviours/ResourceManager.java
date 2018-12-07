@@ -38,6 +38,8 @@ public class ResourceManager{
 		double distance_to_emergency = Math.sqrt(Math.pow(ambulance_msg.getX()-emergency.getX(), 2)+Math.pow(ambulance_msg.getY()-emergency.getY(), 2));
 		double distance_to_hospital = distanceHospital(emergency);
 		time = (distance_to_emergency + distance_to_hospital) /my_resource.getSpeed();
+		double time_hospital= 10/emergency.getPriority();
+		time += time_hospital;
 
 			if(active_emergency!=null) {
 				time += (total_time - (start_time - System.currentTimeMillis())/1000);

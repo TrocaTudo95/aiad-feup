@@ -49,26 +49,18 @@ public class JadeLauncher{
 				    
 			
 		createJade();
-//		random_generator(2,2);
-//		//runtime.shutDown();
-//		Thread.sleep(60000);
-//		try {
-//			mainContainer.kill();
-//		} catch (StaleProxyException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		System.out.println("PUTAAAAA");
-//		 profile = new ProfileImpl();
-//			profile.setParameter(Profile.CONTAINER_NAME, "TestContainer");
-//			profile.setParameter(Profile.MAIN_HOST, "localhost");
-//		    mainContainer = runtime.createMainContainer(profile);
-		random_generator(5,5);
+		random_generator(5,10);
 		//out.append()
 		Thread.sleep(60000);
 		 out.append(number_ambulances+","+number_emergencies+","+calculate_time()+","+calculate_velocidade()+","+calculate_gravidade()+"\n");
 		    out.close();
 		    out2.close();
+		    try {
+				mainContainer.kill();
+			} catch (StaleProxyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		
 	}
 	
@@ -144,7 +136,7 @@ public class JadeLauncher{
 		for(int i=0; i<numAmbulances; i++) {
 			int x= rand.nextInt(30)+1;
 			int y=rand.nextInt(30)+1;
-			int speed= rand.nextInt(20)+1;
+			int speed= rand.nextInt(10)+1;
 			velocidades.add(speed);
 			agentNick = "amb" + am;
         	am++;
@@ -162,7 +154,7 @@ public class JadeLauncher{
 		for(int i=0; i<numEmergencies; i++) {
 			int x= rand.nextInt(30)+1;
 			int y=rand.nextInt(30)+1;
-			int priority= rand.nextInt(20)+1;
+			int priority= rand.nextInt(10)+1;
 			prioridades.add(priority);
 			agentNick = "em" + em;
         	em++;
