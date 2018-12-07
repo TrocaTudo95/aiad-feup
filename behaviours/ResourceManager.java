@@ -32,12 +32,17 @@ public class ResourceManager{
 	public ResourceManager(Ambulance resource_agent) {
 		this.my_resource= resource_agent;
 	}
+	
+	public double calculateDistance(EmergencyMessage ambulance_msg, EmergencyMessage emergency) {
+		double distance_to_emergency = Math.sqrt(Math.pow(ambulance_msg.getX()-emergency.getX(), 2)+Math.pow(ambulance_msg.getY()-emergency.getY(), 2));
+		double distance_to_hospital = distanceHospital(emergency);
+		return distance_to_emergency +distance_to_hospital;
+	}
 
 	public double calculateTime(EmergencyMessage ambulance_msg, EmergencyMessage emergency) {
 		double time=0;
-		double distance_to_emergency = Math.sqrt(Math.pow(ambulance_msg.getX()-emergency.getX(), 2)+Math.pow(ambulance_msg.getY()-emergency.getY(), 2));
-		double distance_to_hospital = distanceHospital(emergency);
-		time = (distance_to_emergency + distance_to_hospital) /my_resource.getSpeed();
+		
+		time = (calculateDistance(ambulance_msg,emergency)) /my_resource.getSpeed();
 		double time_hospital= 10/emergency.getPriority();
 		time += time_hospital;
 
