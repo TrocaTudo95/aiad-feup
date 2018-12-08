@@ -24,43 +24,47 @@ public class JadeLauncher{
 	public static ArrayList<Double> times= new ArrayList<Double>(); 
 	private static ArrayList<Integer> velocidades= new ArrayList<Integer>();
 	private static ArrayList<Integer> prioridades= new ArrayList<Integer>();
+	public static ArrayList<Double> distancias= new ArrayList<Double>();
 	private static int number_emergencies=0;
 	private static int number_ambulances=0;
 	private static int velocidade_media=0;
 	private static int media_gravidades=0;
 	public static PrintWriter out2;
+	public static PrintWriter out;
 	
 	
 	public static void main(String [] args) throws InterruptedException, IOException{
-		 File log = new File("main_log.csv");
-		 File log2 = new File("ind_log.csv");
+		 
 				   
-				    if(log.exists()==false){
-				            try {
-				            	System.out.println("RIP");
-								log.createNewFile();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-				    }
-				    PrintWriter out = new PrintWriter(new FileWriter(log, true));
-				    			out2 =new PrintWriter(new FileWriter(log2, true));
+//				    if(log.exists()==false){
+//				            try {
+//				            	System.out.println("RIP");
+//								log.createNewFile();
+//							} catch (IOException e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
+//				    }
+//				     out = new PrintWriter(new FileWriter(log, true));
+//				    			out2 =new PrintWriter(new FileWriter(log2, true));
 				    
 			
 		createJade();
-		random_generator(5,10);
-		//out.append()
-		Thread.sleep(60000);
-		 out.append(number_ambulances+","+number_emergencies+","+calculate_time()+","+calculate_velocidade()+","+calculate_gravidade()+"\n");
-		    out.close();
-		    out2.close();
-		    try {
-				mainContainer.kill();
-			} catch (StaleProxyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		parseText();
+		
+	    System.out.println("ACABOUUUU");
+//		random_generator(5,15);
+//		//out.append()
+//		Thread.sleep(80000);
+//		 out.append(number_ambulances+","+number_emergencies+","+calculate_distancia()+","+calculate_time()+","+calculate_velocidade()+","+calculate_gravidade()+"\n");
+//		    out.close();
+//		    out2.close();
+//		    try {
+//				mainContainer.kill();
+//			} catch (StaleProxyException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		
 	}
 	
@@ -88,13 +92,32 @@ public class JadeLauncher{
 		return soma/number_emergencies;
 	}
 	
+	public static double calculate_distancia() {
+		double soma=0;
+		for(int i=0; i<distancias.size();i++) {
+			soma+= distancias.get(i);
+		}
+		return soma/number_emergencies;
+	}
 	
-	public static void parseText() throws FileNotFoundException, InterruptedException {
+	
+	public static void parseText() throws InterruptedException, IOException {
 		
-		int am = 1;
-		int em = 1;
+		File log = new File("main_log.csv");
+		 File log2 = new File("ind_log.csv");
 		
 		File file = new File("data.txt");
+		if(log.exists()==false){
+            try {
+            	System.out.println("RIP");
+				log.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    }
+    
+    
         try {
             Scanner scanner = new Scanner(file);
             while (scanner.hasNextLine()) {
@@ -103,26 +126,36 @@ public class JadeLauncher{
                 
                 String[] info = line.split("-");
                                            
-                String agentNick;
-                String agentName = info[0];
-                Object [] agentArguments = {info[1], info[2],info[3]}; 
+                out = new PrintWriter(new FileWriter(log, true));
+    			out2 =new PrintWriter(new FileWriter(log2, true));
+          
+                random_generator(Integer.parseInt(info[0]),Integer.parseInt(info[1]));
+        		//out.append()
+                if(number_emergencies<15)
+        		Thread.sleep(100000);
+                else if(number_emergencies<20)
+                	Thread.sleep(150000);
+                else
+                	Thread.sleep(200000);
+        		 out.append(number_ambulances+","+number_emergencies+","+calculate_distancia()+","+calculate_time()+","+calculate_velocidade()+","+calculate_gravidade()+"\n");
+        		    try {
+        				mainContainer.kill();
+        			} catch (StaleProxyException e) {
+        				// TODO Auto-generated catch block
+        				e.printStackTrace();
+        			}
+        		    profile = new ProfileImpl();
+        			profile.setParameter(Profile.CONTAINER_NAME, "TestContainer");
+        			profile.setParameter(Profile.MAIN_HOST, "localhost");
+        		    mainContainer = runtime.createMainContainer(profile);
+        		    out.close();
+        		    out2.close();
                 
-                if(agentName.equals("Ambulance")) {
-                	agentNick = "amb" + am;
-                	am++;
-                }
-                else {
-                	agentNick = "em" +em;
-                	em++;
-                }
                 
-                createAgent(agentNick,agentName, agentArguments);
-                Thread.sleep(1000);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-		
 	}
 	public static void random_generator(int numAmbulances, int numEmergencies) {
 		
@@ -132,15 +165,19 @@ public class JadeLauncher{
 		String agentNick;
 		number_ambulances=numAmbulances;
 		number_emergencies=numEmergencies;
+		velocidades= new ArrayList<Integer>();
+		prioridades= new ArrayList<Integer>();
+		distancias=new ArrayList<Double>();
+		times=new ArrayList<Double>();
 		
 		for(int i=0; i<numAmbulances; i++) {
 			int x= rand.nextInt(30)+1;
 			int y=rand.nextInt(30)+1;
-			int speed= rand.nextInt(10)+1;
+			int speed= rand.nextInt(10)+5;
 			velocidades.add(speed);
 			agentNick = "amb" + am;
         	am++;
-        	Object [] agentArguments = {""+x, ""+y,""+speed}; 
+        	Object [] agentArguments = {""+speed,""+x, ""+y}; 
         	createAgent(agentNick,"Ambulance", agentArguments);
         	try {
 				Thread.sleep(1000);
@@ -158,7 +195,7 @@ public class JadeLauncher{
 			prioridades.add(priority);
 			agentNick = "em" + em;
         	em++;
-        	Object [] agentArguments = {""+x, ""+y,""+priority}; 
+        	Object [] agentArguments = {""+priority,""+x, ""+y}; 
         	createAgent(agentNick,"Emergency", agentArguments);
         	try {
 				Thread.sleep(1000);
