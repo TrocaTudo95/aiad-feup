@@ -132,7 +132,7 @@ public class JadeLauncher{
                 random_generator(Integer.parseInt(info[0]),Integer.parseInt(info[1]));
         		//out.append()
                 if(number_emergencies<15)
-        		Thread.sleep(100000);
+        		Thread.sleep(180000);
                 else if(number_emergencies<20)
                 	Thread.sleep(150000);
                 else
@@ -173,7 +173,7 @@ public class JadeLauncher{
 		for(int i=0; i<numAmbulances; i++) {
 			int x= rand.nextInt(30)+1;
 			int y=rand.nextInt(30)+1;
-			int speed= rand.nextInt(10)+5;
+			int speed= 15;//rand.nextInt(10)+5;
 			velocidades.add(speed);
 			agentNick = "amb" + am;
         	am++;
