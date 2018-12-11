@@ -236,7 +236,6 @@ public class ResourceManager{
 				System.out.println("\nResource " + best_agent.getName() + " will attend emergency " + pendent_emergency.getSenderID().getName());
 
 					if(best_agent.equals(myAgent.getAID())){
-						JadeLauncher.times.add(time);
 						step=3;
 					}
 					else {
@@ -356,7 +355,6 @@ public class ResourceManager{
 							e.printStackTrace();
 						}
 						double time = calculateTime(my_resource.getMessage(),current_emergency);
-						JadeLauncher.times.add(time);
 
 						myAgent.addBehaviour(new EmergencyServer());
 						step=0;
@@ -391,14 +389,17 @@ public class ResourceManager{
 			start_time = System.currentTimeMillis();
 			total_time = calculateTime(my_resource.getMessage(),current_emergency);
 			 double distance= Math.sqrt(Math.pow(my_resource.getX()-current_emergency.getX(), 2)+Math.pow(my_resource.getY()-current_emergency.getY(), 2));
-			JadeLauncher.out2.append(my_resource.getSpeed()+","+distance+","+current_emergency.getPriority()+","+calculateTime(my_resource.getMessage(),current_emergency)+"\n");
-	active_emergency = current_emergency;
+			 JadeLauncher.times.add(total_time);
+			 JadeLauncher.distancias.add(calculateDistance(my_resource.getMessage(),current_emergency));	
+			JadeLauncher.out2.append(JadeLauncher.number_ambulances+","+my_resource.getEmergencyAgents().length+","+my_resource.getSpeed()+","+distance+","+current_emergency.getPriority()+","+total_time+"\n");
+			active_emergency = current_emergency;
 			myAgent.addBehaviour(new TickerBehaviour(myAgent, (long) (total_time*1000)) {
 				protected void onTick() {
 					System.out.println("Emergency " + current_emergency.getSenderID().getLocalName() + " served.\n");
 					active_emergency = null;
 					my_resource.updateAmbulancePosition(hospital.getX(),hospital.getY());
 					myAgent.removeBehaviour(this);
+					
 
 				}
 			});
